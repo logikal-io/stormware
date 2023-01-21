@@ -1,0 +1,5 @@
+-r core.txt
+-r build.txt
+-r docs.txt
+
+pytest-logikal==1.3.0

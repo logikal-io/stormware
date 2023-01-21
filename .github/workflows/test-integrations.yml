@@ -1,0 +1,17 @@
+name: Test integrations
+on:
+  schedule:
+    - cron: '8 10 * * *'
+
+jobs:
+  run-python-tests:
+    name: Run Python tests
+    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v3
+    with:
+      pytest-options: >-
+        --no-mypy --no-bandit --no-isort --no-pylint --no-style
+        --no-build --no-docs --no-licenses --no-requirements
+    permissions:
+      contents: read
+      id-token: write
+    secrets: inherit

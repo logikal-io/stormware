@@ -1,0 +1,4 @@
+pandas~=1.5
+pandas-stubs~=1.5
+tomli~=2.0
+xdg~=5.1

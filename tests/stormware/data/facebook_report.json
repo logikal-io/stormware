@@ -1,0 +1,19 @@
+[
+  {
+    "actions": [
+      {"action_type": "link_click", "value": "1"},
+      {"action_type": "post_engagement", "value": "1"},
+      {"action_type": "page_engagement", "value": "1"}
+    ],
+    "ad_name": "(s_data_science)",
+    "campaign_name": "(y_2023)(p_mindlab)(g_discover)(o_traffic)(c_USA)",
+    "clicks": 1,
+    "date_start": "2023-01-07",
+    "date_stop": "2023-01-07",
+    "impressions": 115,
+    "spend": 3.31,
+    "actions:link_click": 1,
+    "actions:page_engagement": 1,
+    "actions:post_engagement": 1
+  }
+]
