@@ -36,7 +36,7 @@ amazon = {file = 'requirements/extras/amazon.txt'}
 facebook = {file = 'requirements/extras/facebook.txt'}
 
 [tool.setuptools]
-packages = ['stormware', 'stormware.google']
+packages = ['stormware', 'stormware.amazon', 'stormware.google']
 
 [tool.setuptools_scm]
 
