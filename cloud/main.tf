@@ -63,21 +63,18 @@ resource "google_bigquery_dataset" "test" {
 
 # Permissions
 resource "google_secret_manager_secret_iam_member" "test_adder" {
-  project = var.project_id
   secret_id = google_secret_manager_secret.test.id
   role = "roles/secretmanager.secretVersionAdder"
   member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
 }
 
 resource "google_secret_manager_secret_iam_member" "test_accessor" {
-  project = var.project_id
   secret_id = google_secret_manager_secret.test.id
   role = "roles/secretmanager.secretAccessor"
   member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
 }
 
 resource "google_secret_manager_secret_iam_member" "facebook_accessor" {
-  project = var.project_id
   secret_id = google_secret_manager_secret.facebook.id
   role = "roles/secretmanager.secretAccessor"
   member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
@@ -90,7 +87,6 @@ resource "google_project_iam_member" "bigquery_job_user" {
 }
 
 resource "google_bigquery_dataset_access" "test" {
-  project = var.project_id
   dataset_id = google_bigquery_dataset.test.dataset_id
   role = "roles/bigquery.dataEditor"
   user_by_email = module.gcp_github_auth.service_account_emails["testing"]
