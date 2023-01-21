@@ -19,7 +19,7 @@ class SecretsManager(SecretStore):  # pylint: disable=too-few-public-methods
         auth: Optional[AWSAuth] = None,
     ):
         """
-        Store and retrieve secrets from AWS Secrets Manager.
+        AWS Secrets Manager connector.
 
         Args:
             organization: The default organization to use.

@@ -8,12 +8,12 @@ CLI tools.
 .. note::
 
     You must install the ``google`` extra when using the Google Cloud Platform authentication
-    mechanism or the Google Cloud Secret Manager secret store.
+    mechanism.
 
 .. note::
 
     You must install the ``amazon`` extra when using the Amazon Web Services authentication
-    mechanism or the AWS Secrets Manager secret store.
+    mechanism.
 
 Google Cloud Platform
 ---------------------
@@ -45,7 +45,8 @@ Amazon Web Services
 The authentication logic is implemented in :class:`~stormware.amazon.auth.AWSAuth`, which looks for
 the credentials of the ``organization_id`` named profile, where ``organization_id`` is derived the
 same way as it is for the Google Cloud Platform authentication. If the credentials cannot be found
-for the named profile then the default ``boto3`` credential location mechanism is used.
+for the named profile then the ``boto3`` :ref:`credential location mechanism
+<boto3:guide_credentials>` is used.
 
 .. note::
 
@@ -59,14 +60,12 @@ The credentials for most connectors are retrieved from a secret store, which has
 abstract interface:
 
 .. autoclass:: stormware.secrets.SecretStore
-    :special-members: __getitem__, __setitem__
+    :special-members: __getitem__
 
-Stormware comes with two built-in secret store implementations for Google Cloud Platform and Amazon
-Web Services, and further secret stores can be easily added by simply inheriting and implementing
-the :class:`~stormware.secrets.SecretStore` interface.
-
-.. autoclass:: stormware.google.secrets.SecretManager
-.. autoclass:: stormware.amazon.secrets.SecretsManager
+Stormware comes with two built-in secret store implementations for :ref:`Google Cloud Platform
+<connectors:Google Secret Manager>` and :ref:`Amazon Web Services <connectors:AWS Secrets
+Manager>`, and further secret stores can be easily added by simply inheriting and implementing the
+:class:`~stormware.secrets.SecretStore` interface.
 
 .. note::
 

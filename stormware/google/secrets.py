@@ -24,7 +24,7 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
         auth: Optional[GCPAuth] = None,
     ):
         """
-        Store and retrieve secrets from Google Cloud Secret Manager.
+        Google Cloud Secret Manager connector.
 
         Must be used with a context manager.
 
@@ -43,6 +43,9 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
         return client.__enter__()  # type: ignore # pylint: disable=unnecessary-dunder-call
 
     def __getitem__(self, key: str) -> str:
+        """
+        Retrieve the secret under the given key.
+        """
         logger.debug(f'Loading secret "{key}"')
         response = self.client.access_secret_version(name=self._secret_version_path(key))
 
