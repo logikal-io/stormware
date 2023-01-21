@@ -1,0 +1,6 @@
+exclude .gitignore
+exclude conftest.py
+prune .github
+prune cloud
+prune docs
+prune tests

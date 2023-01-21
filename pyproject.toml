@@ -1,0 +1,58 @@
+[build-system]
+requires = ['setuptools>=45', 'setuptools-scm[toml]>=6.2']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'stormware'
+description = 'API connectors for data analysis and task automation'
+readme = 'README.rst'
+requires-python = '~= 3.8'
+license = {file = 'LICENSE.txt'}
+authors = [{name = 'Logikal GmbH', email = 'contact@logikal.io'}]
+keywords = ['api', 'connector']
+classifiers = [
+  'Development Status :: 5 - Production/Stable',
+  'Intended Audience :: Developers',
+  'License :: OSI Approved :: MIT License',
+  'Operating System :: POSIX :: Linux',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.8',
+  'Topic :: Software Development :: Libraries :: Python Modules',
+]
+dynamic = ['version', 'dependencies', 'optional-dependencies']
+
+[project.urls]
+'Documentation' = 'https://docs.logikal.io/stormware/'
+'Release notes' = 'https://github.com/logikal-io/stormware/releases'
+'Issue tracker' = 'https://github.com/logikal-io/stormware/issues'
+'Source code' = 'https://github.com/logikal-io/stormware'
+
+[tool.setuptools.dynamic]
+dependencies = {file = 'requirements/core.txt'}
+
+[tool.setuptools.dynamic.optional-dependencies]
+google = {file = 'requirements/extras/google.txt'}
+amazon = {file = 'requirements/extras/amazon.txt'}
+facebook = {file = 'requirements/extras/facebook.txt'}
+
+[tool.setuptools]
+packages = ['stormware', 'stormware.amazon', 'stormware.google']
+
+[tool.setuptools_scm]
+
+[tool.stormware]
+organization = 'logikal.io'
+project = 'stormware'
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = [
+  'facebook_business.*',
+  'google_crc32c',
+]
+
+[tool.pytest.ini_options]
+norecursedirs = ['build', 'docs/jupyter_execute']
+
+[tool.coverage.report]
+exclude_lines = ['\.\.\.']  # exclude abstract methods
