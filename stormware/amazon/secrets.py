@@ -12,7 +12,7 @@ from stormware.secrets import SecretStore
 logger = getLogger(__name__)
 
 
-class SecretsManager(SecretStore):
+class SecretsManager(SecretStore):  # pylint: disable=too-few-public-methods
     def __init__(
         self,
         organization: Optional[str] = None,
@@ -30,10 +30,9 @@ class SecretsManager(SecretStore):
         self._client = self.auth.session().client('secretsmanager')
 
     def __getitem__(self, key: str) -> str:
+        """
+        Retrieve the secret under the given key.
+        """
         logger.debug(f'Loading secret "{key}"')
         response = self._client.get_secret_value(SecretId=key)
         return response['SecretString']  # type: ignore[no-any-return]
-
-    def __setitem__(self, key: str, value: str) -> None:
-        logger.debug(f'Updating secret "{key}"')
-        self._client.put_secret_value(SecretId=key, SecretString=value)

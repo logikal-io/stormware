@@ -10,5 +10,4 @@ def test_secrets_manager() -> None:
     secret_value = 'test'  # nosec, only used for testing
 
     secrets = SecretsManager()
-    secrets[secret_key] = secret_value
     assert secrets[secret_key] == secret_value

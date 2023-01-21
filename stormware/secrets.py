@@ -6,17 +6,11 @@ from typing import Any, Optional
 logger = getLogger(__name__)
 
 
-class SecretStore(ABC):
+class SecretStore(ABC):  # pylint: disable=too-few-public-methods
     @abstractmethod
     def __getitem__(self, key: str) -> str:
         """
         Retrieve the secret under the given key.
-        """
-
-    @abstractmethod
-    def __setitem__(self, key: str, value: str) -> None:
-        """
-        Set the secret under the given key to the specified value.
         """
 
 

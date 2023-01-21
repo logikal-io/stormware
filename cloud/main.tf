@@ -62,12 +62,6 @@ resource "google_bigquery_dataset" "test" {
 }
 
 # Permissions
-resource "google_secret_manager_secret_iam_member" "test_adder" {
-  secret_id = google_secret_manager_secret.test.id
-  role = "roles/secretmanager.secretVersionAdder"
-  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
-}
-
 resource "google_secret_manager_secret_iam_member" "test_accessor" {
   secret_id = google_secret_manager_secret.test.id
   role = "roles/secretmanager.secretAccessor"

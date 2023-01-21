@@ -7,7 +7,7 @@ from logging import getLogger
 from typing import Optional
 
 import google_crc32c
-from google.cloud.secretmanager import SecretManagerServiceClient, SecretPayload
+from google.cloud.secretmanager import SecretManagerServiceClient
 
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
@@ -42,25 +42,6 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
         client = SecretManagerServiceClient(credentials=self.auth.credentials())
         return client.__enter__()  # type: ignore # pylint: disable=unnecessary-dunder-call
 
-    def _secret_path(self, key: str) -> str:
-        return f'projects/{self._project_id}/secrets/{key}'
-
-    def _secret_version_path(self, key: str, version: str = 'latest') -> str:
-        return f'{self._secret_path(key)}/versions/{version}'
-
-    def _latest_version(self, key: str) -> str:
-        logger.debug(f'Retrieving latest version number of key "{key}"')
-        response = self.client.get_secret_version(name=self._secret_version_path(key))
-        return response.name
-
-    def delete(self, key: str, version: str = 'latest') -> None:
-        """
-        Delete the secret under the given key.
-        """
-        logger.debug(f'Deleting secret "{key}" version "{version}"')
-        name = self._latest_version(key) if version == 'latest' else self._secret_version_path(key)
-        self.client.destroy_secret_version(name=name)
-
     def __getitem__(self, key: str) -> str:
         logger.debug(f'Loading secret "{key}"')
         response = self.client.access_secret_version(name=self._secret_version_path(key))
@@ -71,11 +52,8 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
 
         return response.payload.data.decode('utf-8')
 
-    def __setitem__(self, key: str, value: str) -> None:
-        logger.debug(f'Updating secret "{key}"')
-        data = value.encode('utf-8')
-        data_crc32c = google_crc32c.Checksum(data)
-        self.client.add_secret_version(
-            parent=self._secret_path(key),
-            payload=SecretPayload(data=data, data_crc32c=int(data_crc32c.hexdigest(), 16)),
-        )
+    def _secret_path(self, key: str) -> str:
+        return f'projects/{self._project_id}/secrets/{key}'
+
+    def _secret_version_path(self, key: str, version: str = 'latest') -> str:
+        return f'{self._secret_path(key)}/versions/{version}'

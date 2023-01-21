@@ -9,9 +9,7 @@ def test_secret_manager() -> None:
     secret_value = 'test'  # nosec, only used for testing
 
     with SecretManager() as secrets:
-        secrets[secret_key] = secret_value
         assert secrets[secret_key] == secret_value
-        secrets.delete(secret_key)
 
 
 def test_data_corruption(mocker: MockerFixture) -> None:
