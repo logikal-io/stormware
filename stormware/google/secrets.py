@@ -48,6 +48,19 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
     def _secret_version_path(self, key: str, version: str = 'latest') -> str:
         return f'{self._secret_path(key)}/versions/{version}'
 
+    def _latest_version(self, key: str) -> str:
+        logger.debug(f'Retrieving latest version number of key "{key}"')
+        response = self.client.get_secret_version(name=self._secret_version_path(key))
+        return response.name
+
+    def delete(self, key: str, version: str = 'latest') -> None:
+        """
+        Delete the secret under the given key.
+        """
+        logger.debug(f'Deleting secret "{key}" version "{version}"')
+        name = self._latest_version(key) if version == 'latest' else self._secret_version_path(key)
+        self.client.destroy_secret_version(name=name)
+
     def __getitem__(self, key: str) -> str:
         logger.debug(f'Loading secret "{key}"')
         response = self.client.access_secret_version(name=self._secret_version_path(key))

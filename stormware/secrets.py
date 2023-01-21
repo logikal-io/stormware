@@ -10,7 +10,7 @@ class SecretStore(ABC):
     @abstractmethod
     def __getitem__(self, key: str) -> str:
         """
-        Retrieve the secret with the given key.
+        Retrieve the secret under the given key.
         """
 
     @abstractmethod
