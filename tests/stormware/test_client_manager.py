@@ -24,7 +24,7 @@ def test_invalid_client_manager() -> None:
 
 
 class CloseableClient:  # pylint: disable=too-few-public-methods
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.closed = False
 
@@ -35,7 +35,7 @@ class CloseableClient:  # pylint: disable=too-few-public-methods
 class ExiteableClient(  # pylint: disable=too-few-public-methods
     AbstractContextManager,  # type: ignore[type-arg]
 ):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.closed = False
 

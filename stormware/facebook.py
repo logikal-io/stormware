@@ -26,7 +26,7 @@ class FacebookAds:
         account_name: Optional[str] = None,
         secret_key: str = 'stormware-facebook',
         secret_store: Optional[SecretStore] = None,
-    ) -> None:
+    ):
         """
         Facebook Ads connector.
 

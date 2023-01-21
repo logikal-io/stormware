@@ -18,7 +18,7 @@ class ClientManager(
     AbstractContextManager,  # type: ignore[type-arg] # only subscriptable in Python 3.9+
     Generic[Client],
 ):
-    def __init__(self, *_args: Any, **_kwargs: Any) -> None:
+    def __init__(self, *_args: Any, **_kwargs: Any):
         self._client: Optional[Client] = None
 
     @property
