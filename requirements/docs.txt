@@ -4,4 +4,4 @@
 -r extras/amazon.txt
 -r extras/facebook.txt
 
-logikal-docs[jupyter]==1.1.2
+logikal-docs[jupyter]==1.1.3

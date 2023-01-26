@@ -40,7 +40,7 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
 
     def create_client(self) -> SecretManagerServiceClient:
         client = SecretManagerServiceClient(credentials=self.auth.credentials())
-        return client.__enter__()  # type: ignore # pylint: disable=unnecessary-dunder-call
+        return client.__enter__()  # pylint: disable=unnecessary-dunder-call
 
     def __getitem__(self, key: str) -> str:
         """
