@@ -62,6 +62,13 @@ resource "google_bigquery_dataset" "test" {
 }
 
 # Permissions
+locals {
+  service_accounts = toset([
+    module.gcp_github_auth.service_account_emails["testing"],
+    "docs-uploader@docs-logikal-io.iam.gserviceaccount.com",
+  ])
+}
+
 resource "google_secret_manager_secret_iam_member" "test_accessor" {
   secret_id = google_secret_manager_secret.test.id
   role = "roles/secretmanager.secretAccessor"
@@ -69,21 +76,27 @@ resource "google_secret_manager_secret_iam_member" "test_accessor" {
 }
 
 resource "google_secret_manager_secret_iam_member" "facebook_accessor" {
+  for_each = local.service_accounts
+
   secret_id = google_secret_manager_secret.facebook.id
   role = "roles/secretmanager.secretAccessor"
-  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
+  member = "serviceAccount:${each.key}"
 }
 
 resource "google_project_iam_member" "bigquery_job_user" {
+  for_each = local.service_accounts
+
   project = var.project_id
   role = "roles/bigquery.jobUser"
-  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
+  member = "serviceAccount:${each.key}"
 }
 
 resource "google_bigquery_dataset_access" "test" {
+  for_each = local.service_accounts
+
   dataset_id = google_bigquery_dataset.test.dataset_id
   role = "roles/bigquery.dataEditor"
-  user_by_email = module.gcp_github_auth.service_account_emails["testing"]
+  user_by_email = each.key
 }
 
 data "aws_iam_policy_document" "test_secret_access" {
