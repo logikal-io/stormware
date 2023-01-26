@@ -6,10 +6,10 @@ on:
 jobs:
   run-python-tests:
     name: Run Python tests
-    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v3
+    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v4
     with:
       pytest-options: >-
-        --no-mypy --no-bandit --no-isort --no-pylint --no-style
+        --no-cov --no-mypy --no-bandit --no-isort --no-pylint --no-style
         --no-build --no-docs --no-licenses --no-requirements
     permissions:
       contents: read

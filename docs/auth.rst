@@ -31,7 +31,7 @@ credentials file does not exist, we use the application default credentials.
     connectors that are not related to the Google Cloud Platform (for example, the
     :ref:`connectors:Google Sheets` connector).
 
-A default organization and project can be set under the ``tool.mindlab`` section of a project's
+A default organization and project can be set under the ``tool.stormware`` section of a project's
 ``pyproject.toml`` file as follows:
 
 .. code-block:: toml
@@ -42,11 +42,10 @@ A default organization and project can be set under the ``tool.mindlab`` section
 
 Amazon Web Services
 -------------------
-The authentication logic is implemented in :class:`~stormware.amazon.auth.AWSAuth`, which looks for
-the credentials of the ``organization_id`` named profile, where ``organization_id`` is derived the
-same way as it is for the Google Cloud Platform authentication. If the credentials cannot be found
-for the named profile then the ``boto3`` :ref:`credential location mechanism
-<boto3:guide_credentials>` is used.
+The authentication logic is implemented in :class:`~stormware.amazon.auth.AWSAuth` – we look for
+the credentials of the ``organization_id`` named profile, which is derived the same way as it is
+for the Google Cloud Platform authentication. If the credentials cannot be found for the named
+profile then the ``boto3`` :ref:`credential location mechanism <boto3:guide_credentials>` is used.
 
 .. note::
 
