@@ -13,3 +13,4 @@ jobs:
       contents: read
       id-token: write
     secrets: inherit
+    timeout-minutes: 10
