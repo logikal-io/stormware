@@ -1,3 +1,5 @@
+from functools import partial
+from operator import itemgetter
 from pathlib import Path
 
 import pandas
@@ -31,6 +33,7 @@ def test_report() -> None:
             'time_increment': 1,
         },
     )
+    report['actions'] = report['actions'].apply(partial(sorted, key=itemgetter('action_type')))
     expected = pandas.read_json(
         Path(__file__).parent / 'data/facebook_report.json',
         dtype={'date_start': 'datetime64[ns]', 'date_stop': 'datetime64[ns]'},
