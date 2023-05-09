@@ -30,12 +30,17 @@ class AWSAuth(Auth):
         else:
             logger.debug(f'Named profile credentials file "{credentials}" does not exist')
 
-    def session(self, organization: Optional[str] = None, region: Optional[str] = None) -> Session:
+    def profile(self, organization: Optional[str] = None) -> Optional[str]:
         """
-        Return a session that uses the organization ID named profile credentials (if it exists).
+        Return the profile name (same as the organization ID) or :data:`None` if it does not exist.
         """
         organization_id = self.organization_id(organization=organization)
-        profile = organization_id if organization_id in self.profiles else None
-        if profile:
+        if (profile := organization_id if organization_id in self.profiles else None):
             logger.debug(f'Using named profile "{profile}"')
-        return Session(profile_name=profile, region_name=region)
+        return profile
+
+    def session(self, organization: Optional[str] = None, region: Optional[str] = None) -> Session:
+        """
+        Return a session that uses named profile credentials (if it exists).
+        """
+        return Session(profile_name=self.profile(organization=organization), region_name=region)

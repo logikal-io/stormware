@@ -114,7 +114,8 @@ class Spreadsheet(ClientManager[Any]):
 
         # Data formatting and update
         for index, (column, data_type) in enumerate(data.dtypes.items()):
-            column = cast(str, column)  # looks like the type is derived incorrectly, we must cast
+            # Type is derived incorrectly, we must cast
+            column = cast(str, column)  # pylint: disable=redefined-loop-name
             sheet_range = {'sheet_id': sheet_id, 'start_column': index, 'end_column': index + 1}
             updates.append(self._format(
                 {'horizontalAlignment': 'RIGHT' if types.is_numeric_dtype(data_type) else 'LEFT'},
@@ -131,15 +132,16 @@ class Spreadsheet(ClientManager[Any]):
             elif types.is_object_dtype(data_type):
                 first_index = data[column].first_valid_index()
                 first_value = data[column].loc[first_index] if first_index is not None else None
-                if isinstance(first_value, date):
-                    data[column] = data[column].apply(
-                        lambda value: value.strftime('%Y-%m-%d')  # type: ignore[no-any-return]
-                    )
+                data[column] = data[column].apply(
+                    lambda value: value.strftime('%Y-%m-%d')  # type: ignore[no-any-return]
+                ) if isinstance(first_value, date) else data[column]
             elif types.is_datetime64_ns_dtype(data_type):
-                if ((data[column].dt.microsecond == 0) | (data[column].isnull())).all():
-                    data[column] = data[column].dt.strftime('%Y-%m-%d %H:%M:%S')
-                else:
-                    data[column] = data[column].dt.strftime('%Y-%m-%d %H:%M:%S.%f')
+                no_microseconds = (
+                    (data[column].dt.microsecond == 0)  # pylint: disable=compare-to-zero
+                    | (data[column].isnull())
+                )
+                microseconds = '.%f' if not no_microseconds.all() else ''
+                data[column] = data[column].dt.strftime(f'%Y-%m-%d %H:%M:%S{microseconds}')
 
         logger.info(f'Updating sheet "{name}"')
         self.update(updates)

@@ -4,6 +4,7 @@ Facebook API connector.
 Documentation:
 - Python Business SDK: https://github.com/facebook/facebook-python-business-sdk
 - Marketing API: https://developers.facebook.com/docs/marketing-apis
+- Changelog: https://developers.facebook.com/docs/graph-api/changelog
 
 """
 import json
@@ -61,8 +62,7 @@ class FacebookAds:
         """
         Return the account ID for a given account name.
         """
-        account_name = account_name or self.account_name
-        if not account_name:
+        if not (account_name := account_name or self.account_name):
             raise ValueError('You must specify the account')
         if account_name not in self.ad_accounts:
             raise RuntimeError(f'Account "{account_name}" not found in your accounts')
