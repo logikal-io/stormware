@@ -37,8 +37,7 @@ class GCPAuth(Auth):
         Defaults to the ``project`` value set in ``pyproject.toml`` under the ``tool.stormware``
         section.
         """
-        project = project or self._project or STORMWARE_CONFIG.get('project')
-        if not project:
+        if not (project := project or self._project or STORMWARE_CONFIG.get('project')):
             raise ValueError('You must provide a project')
         return project
 

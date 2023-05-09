@@ -1,7 +1,7 @@
-google-api-python-client==2.74.0
-google-api-python-client-stubs==1.15.0
-google-auth==2.16.0
+google-api-python-client==2.86.0
+google-api-python-client-stubs==1.16.0
+google-auth==2.17.3
 google-auth-stubs==0.2.0
-google-cloud-bigquery[pandas]==3.4.2
-google-cloud-secret-manager==2.15.1
+google-cloud-bigquery[pandas]==3.10.0
+google-cloud-secret-manager==2.16.1
 google-crc32c==1.5.0

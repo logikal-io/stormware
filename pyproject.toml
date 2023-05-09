@@ -54,6 +54,14 @@ module = [
 
 [tool.pytest.ini_options]
 norecursedirs = ['build', 'docs/jupyter_execute']
+filterwarnings = [
+  'error',
+  # See https://github.com/googleapis/python-crc32c/issues/168
+  'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
+  # See https://github.com/googleapis/api-common-protos/issues/121
+  "ignore:Deprecated call to `pkg_resources.declare_namespace\\('google:DeprecationWarning",
+  "ignore:Deprecated call to `pkg_resources.declare_namespace\\('sphinxcontrib:DeprecationWarning",
+]
 
 [tool.coverage.report]
 exclude_lines = ['\.\.\.']  # exclude abstract methods
