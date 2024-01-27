@@ -51,7 +51,7 @@ class FacebookAds:
         self.account_name = account_name
         with default_secret_store(secret_store) as secrets:
             credentials = json.loads(secrets[secret_key])
-        self.api = FacebookAdsApi(FacebookSession(**credentials), api_version='v18.0')
+        self.api = FacebookAdsApi(FacebookSession(**credentials), api_version='v19.0')
 
         logger.info('Loading Facebook Ads accounts')
         user = BusinessUser(fbid='me', api=self.api)
