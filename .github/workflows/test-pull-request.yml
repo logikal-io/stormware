@@ -4,7 +4,7 @@ on: pull_request
 jobs:
   run-python-tests:
     name: Run Python tests
-    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v4
+    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v5
     permissions:
       contents: read
       id-token: write
@@ -12,4 +12,4 @@ jobs:
 
   run-terraform-tests:
     name: Run Terraform tests
-    uses: logikal-io/github-workflows/.github/workflows/run-terraform-tests.yml@v4
+    uses: logikal-io/github-workflows/.github/workflows/run-terraform-tests.yml@v5
