@@ -9,10 +9,10 @@ from typing import Dict, Optional, Tuple
 
 from google.auth import default, load_credentials_from_file
 from google.auth.credentials import Credentials
+from logikal_utils.project import PYPROJECT, tool_config
 from xdg import xdg_config_home
 
 from stormware.auth import Auth
-from stormware.pyproject import STORMWARE_CONFIG
 
 logger = getLogger(__name__)
 
@@ -35,9 +35,14 @@ class GCPAuth(Auth):
         Return the project name.
 
         Defaults to the ``project`` value set in ``pyproject.toml`` under the ``tool.stormware``
-        section.
+        section or the ``name`` value set under the ``project`` section.
         """
-        if not (project := project or self._project or STORMWARE_CONFIG.get('project')):
+        project = (
+            project or self._project
+            or tool_config('stormware').get('project')
+            or PYPROJECT.get('project', {}).get('name')
+        )
+        if not project:
             raise ValueError('You must provide a project')
         return project
 

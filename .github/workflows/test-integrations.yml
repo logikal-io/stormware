@@ -1,12 +1,12 @@
 name: Test integrations
 on:
   schedule:
-    - cron: '8 10 * * *'
+    - cron: '8 10 * * *'  # 10:08 UTC
 
 jobs:
   run-python-tests:
     name: Run Python tests
-    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v4
+    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v5
     with:
       pytest-options: --fast
     permissions:

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from stormware.pyproject import STORMWARE_CONFIG
+from logikal_utils.project import tool_config
 
 
 class Auth:
@@ -14,7 +14,10 @@ class Auth:
         Defaults to the ``organization`` value set in ``pyproject.toml`` under the
         ``tool.stormware`` section.
         """
-        organization = organization or self._organization or STORMWARE_CONFIG.get('organization')
+        organization = (
+            organization or self._organization
+            or tool_config('stormware').get('organization')
+        )
         if not organization:
             raise ValueError('You must provide an organization')
         return organization

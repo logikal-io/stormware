@@ -1,11 +1,11 @@
 from pathlib import Path
 
 from google.auth.credentials import AnonymousCredentials
+from logikal_utils.project import PYPROJECT
 from pytest import raises
 from pytest_mock import MockerFixture
 
 from stormware.google.auth import GCPAuth
-from stormware.pyproject import STORMWARE_CONFIG
 
 
 def test_project() -> None:
@@ -17,7 +17,7 @@ def test_project() -> None:
 
 
 def test_project_error(mocker: MockerFixture) -> None:
-    mocker.patch.dict(STORMWARE_CONFIG, {'project': None})
+    mocker.patch.dict(PYPROJECT, {'project': {}, 'tool': {'stormware': {'project': None}}})
     with raises(ValueError, match='You must provide a project'):
         GCPAuth().project()
 

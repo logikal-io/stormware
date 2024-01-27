@@ -26,10 +26,10 @@ credentials file does not exist, we use the application default credentials.
 .. note::
 
     We recommend using the `gcpl script
-    <https://github.com/logikal-io/scripts/blob/main/bin/gcpl>`_ for generating organization
-    credentials. Note that you need to add the ``-s stormware`` option if you are using Google
-    connectors that are not related to the Google Cloud Platform (for example, the
-    :ref:`connectors:Google Sheets` connector).
+    <https://github.com/logikal-io/ansible-public-playbooks/blob/main/roles/gcp/files/bin/gcpl>`_
+    for generating organization credentials. Note that you need to add the ``-s stormware`` option
+    if you are using Google connectors that are not related to the Google Cloud Platform (for
+    example, the :ref:`connectors:Google Sheets` connector).
 
 A default organization and project can be set under the ``tool.stormware`` section of a project's
 ``pyproject.toml`` file as follows:
@@ -39,6 +39,9 @@ A default organization and project can be set under the ``tool.stormware`` secti
     [tool.stormware]
     organization = 'example.com'
     project = 'my-project'
+
+If the project is not provided, the ``project.name`` value is used from the ``pyproject.toml`` file
+instead.
 
 Amazon Web Services
 -------------------
@@ -50,8 +53,8 @@ profile then the ``boto3`` :ref:`credential location mechanism <boto3:guide_cred
 .. note::
 
     We recommend using the `awsl script
-    <https://github.com/logikal-io/scripts/blob/main/bin/awsl>`_ for generating named profile
-    credentials.
+    <https://github.com/logikal-io/ansible-public-playbooks/blob/main/roles/aws/files/bin/awsl>`_
+    for generating named profile credentials.
 
 Secret Store
 ------------

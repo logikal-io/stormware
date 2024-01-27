@@ -13,7 +13,7 @@ resource "google_project_service" "bigquery" {
 
 # GitHub Actions
 module "gcp_github_auth" {
-  source = "github.com/logikal-io/terraform-modules//gcp/github-auth?ref=v1.2.0"
+  source = "github.com/logikal-io/terraform-modules//gcp/github-auth?ref=v1.12.6"
 
   service_account_accesses = {
     testing = ["logikal-io/stormware"]
@@ -21,7 +21,7 @@ module "gcp_github_auth" {
 }
 
 module "aws_github_auth" {
-  source = "github.com/logikal-io/terraform-modules//aws/github-auth?ref=v1.2.0"
+  source = "github.com/logikal-io/terraform-modules//aws/github-auth?ref=v1.12.6"
 
   project_id = var.project_id
   role_accesses = {
@@ -33,7 +33,7 @@ module "aws_github_auth" {
 resource "google_secret_manager_secret" "test" {
   secret_id = "stormware-test"
   replication {
-    automatic = true
+    auto {}
   }
 
   depends_on = [google_project_service.secret_manager]
@@ -42,7 +42,7 @@ resource "google_secret_manager_secret" "test" {
 resource "google_secret_manager_secret" "facebook" {
   secret_id = "stormware-facebook"
   replication {
-    automatic = true
+    auto {}
   }
 
   depends_on = [google_project_service.secret_manager]

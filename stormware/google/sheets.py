@@ -133,7 +133,7 @@ class Spreadsheet(ClientManager[Any]):
                 first_index = data[column].first_valid_index()
                 first_value = data[column].loc[first_index] if first_index is not None else None
                 data[column] = data[column].apply(
-                    lambda value: value.strftime('%Y-%m-%d')  # type: ignore[no-any-return]
+                    lambda value: value.strftime('%Y-%m-%d')
                 ) if isinstance(first_value, date) else data[column]
             elif types.is_datetime64_ns_dtype(data_type):
                 no_microseconds = (

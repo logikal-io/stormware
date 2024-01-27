@@ -43,7 +43,6 @@ packages = ['stormware', 'stormware.amazon', 'stormware.google']
 
 [tool.stormware]
 organization = 'logikal.io'
-project = 'stormware'
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
@@ -58,10 +57,11 @@ filterwarnings = [
   'error',
   # See https://github.com/googleapis/python-crc32c/issues/168
   'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
-  # See https://github.com/googleapis/api-common-protos/issues/121
-  "ignore:Deprecated call to `pkg_resources.declare_namespace\\('google:DeprecationWarning",
   "ignore:Deprecated call to `pkg_resources.declare_namespace\\('sphinxcontrib:DeprecationWarning",
 ]
+
+[tool.licenses.extend_allowed_packages]
+jupyter-sphinx = '.*'  # should be removed after updating to jupyter-sphinx >0.5.3
 
 [tool.coverage.report]
 exclude_lines = ['\.\.\.']  # exclude abstract methods

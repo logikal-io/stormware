@@ -9,4 +9,9 @@ def test_set_get() -> None:
     with BigQuery() as bigquery:
         bigquery.set_table(name=table_id, data=TEST_DATA)
         table_data = bigquery.get_table(name=table_id)
-        assert_frame_equal(table_data.astype({'integer': 'int64', 'date': 'object'}), TEST_DATA)
+        assert_frame_equal(table_data.astype({
+            'integer': 'int64',
+            'date': 'object',
+            'datetime': 'datetime64[ns]',
+            'datetime_micro': 'datetime64[ns]',
+        }), TEST_DATA)
