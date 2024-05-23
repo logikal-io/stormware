@@ -38,5 +38,4 @@ def test_report() -> None:
         Path(__file__).parent / 'data/facebook_report.json',
         dtype={'date_start': 'datetime64[ns]', 'date_stop': 'datetime64[ns]'},
     )
-    expected = expected.convert_dtypes()  # pylint: disable=no-member
-    assert_frame_equal(report, expected)
+    assert_frame_equal(report, expected.convert_dtypes())
