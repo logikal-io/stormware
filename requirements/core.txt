@@ -1,4 +1,4 @@
-logikal-utils~=1.0
+logikal-utils~=1.1
 pandas[performance]~=2.0
 pandas-stubs~=2.0
 xdg~=5.1  # Python 3.10+ is required by xdg-base-dirs, which is the replacement library
