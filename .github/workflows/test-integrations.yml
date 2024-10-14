@@ -6,9 +6,15 @@ on:
 jobs:
   run-python-tests:
     name: Run Python tests
-    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v5
+    uses: logikal-io/github-workflows/.github/workflows/run-python-tests.yml@v8
     with:
       pytest-options: --fast
+      aws-testing-role: arn:aws:iam::979401941518:role/testing-stormware-logikal-io
+      aws-testing-region: eu-central-2
+      gcp-testing-workload-identity-provider: "projects/535697707941/locations/global/\
+                                               workloadIdentityPools/ci-cd/providers/\
+                                               github-actions"
+      gcp-testing-service-account: testing@stormware-logikal-io.iam.gserviceaccount.com
     permissions:
       contents: read
       id-token: write
