@@ -23,8 +23,8 @@ def test_project_error(mocker: MockerFixture) -> None:
 
 
 def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
-    file = AnonymousCredentials()
-    default = AnonymousCredentials()
+    file = AnonymousCredentials()  # type: ignore[no-untyped-call]
+    default = AnonymousCredentials()  # type: ignore[no-untyped-call]
 
     mocker.patch('stormware.google.auth.xdg_config_home', return_value=tmp_path)
     org_creds_path = tmp_path / 'gcloud/credentials/example-org.json'

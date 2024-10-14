@@ -1,7 +1,6 @@
-google-api-python-client==2.130.0
-google-api-python-client-stubs==1.26.0
-google-auth==2.29.0
-google-auth-stubs==0.2.0
-google-cloud-bigquery[pandas]~=3.23
-google-cloud-secret-manager==2.20.0
-google-crc32c==1.5.0
+google-api-python-client==2.149.0
+google-auth==2.35.0
+google-cloud-bigquery[pandas]~=3.25
+google-cloud-bigquery-storage~=2.26
+google-cloud-secret-manager==2.20.2
+google-crc32c==1.5.0  # 1.6+ requires Python 3.9

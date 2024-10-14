@@ -91,6 +91,14 @@ resource "google_project_iam_member" "bigquery_job_user" {
   member = "serviceAccount:${each.key}"
 }
 
+resource "google_project_iam_member" "bigquery_read_session_user" {
+  for_each = local.service_accounts
+
+  project = var.project_id
+  role = "roles/bigquery.readSessionUser"
+  member = "serviceAccount:${each.key}"
+}
+
 resource "google_bigquery_dataset_access" "test" {
   for_each = local.service_accounts
 

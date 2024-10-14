@@ -83,7 +83,7 @@ class GCPAuth(Auth):
 
         if organization_credentials := self.organization_credentials_path(organization):
             logger.debug(f'Loading credentials from file "{organization_credentials}"')
-            credentials = load_credentials_from_file(
+            credentials = load_credentials_from_file(  # type: ignore[no-untyped-call]
                 organization_credentials,
                 quota_project_id=self.project_id(organization=organization, project=project)
             )[0]
@@ -91,7 +91,7 @@ class GCPAuth(Auth):
             logger.debug('Loading default credentials')
             # Note: we cannot specify the quota project ID here for some weird reason
             # (see https://github.com/google-github-actions/auth/issues/250)
-            credentials = default()[0]
+            credentials = default()[0]  # type: ignore[no-untyped-call]
 
         self._credentials[(organization, project)] = credentials
         return credentials
