@@ -1,5 +1,13 @@
+import importlib
 import sys
-from importlib.metadata import version as pkg_version
+
+
+def pkg_version(package_name: str) -> str:
+    if package_name == 'google-auth':
+        # See https://github.com/googleapis/google-auth-library-python/issues/1593
+        return '2.30.0'
+    return importlib.metadata.version(package_name)
+
 
 extensions = [
     'sphinx.ext.autosectionlabel',

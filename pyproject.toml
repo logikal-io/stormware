@@ -49,6 +49,7 @@ ignore_missing_imports = true
 module = [
   'facebook_business.*',
   'google_crc32c',
+  'googleapiclient.*',
 ]
 
 [tool.pytest.ini_options]
@@ -58,6 +59,7 @@ filterwarnings = [
   # See https://github.com/googleapis/python-crc32c/issues/168
   'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
   "ignore:Deprecated call to `pkg_resources.declare_namespace\\('sphinxcontrib:DeprecationWarning",
+  'ignore:The python-bigquery library:PendingDeprecationWarning',
 ]
 
 [tool.licenses.extend_allowed_packages]
