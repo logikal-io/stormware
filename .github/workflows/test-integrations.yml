@@ -18,6 +18,5 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    secrets: inherit
     # Not supported currently, see https://github.com/actions/runner/issues/2415
     # timeout-minutes: 10
