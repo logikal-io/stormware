@@ -56,10 +56,7 @@ module = [
 norecursedirs = ['build', 'docs/jupyter_execute']
 filterwarnings = [
   'error',
-  # See https://github.com/googleapis/python-crc32c/issues/168
-  'ignore:pkg_resources is deprecated as an API:DeprecationWarning',
-  "ignore:Deprecated call to `pkg_resources.declare_namespace\\('sphinxcontrib:DeprecationWarning",
-  'ignore:The python-bigquery library:PendingDeprecationWarning',
+  # See https://github.com/boto/boto3/issues/3889
   'ignore:datetime.datetime.utcnow:DeprecationWarning',
 ]
 
