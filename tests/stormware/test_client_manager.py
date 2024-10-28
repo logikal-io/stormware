@@ -1,12 +1,13 @@
+# pylint: disable=too-few-public-methods
 from contextlib import AbstractContextManager
-from typing import Any, Type, Union
+from typing import Any
 
 from pytest import raises
 
 from stormware.client_manager import ClientManager
 
 
-class InvalidClient:  # pylint: disable=too-few-public-methods
+class InvalidClient:
     pass
 
 
@@ -23,7 +24,7 @@ def test_invalid_client_manager() -> None:
             pass
 
 
-class CloseableClient:  # pylint: disable=too-few-public-methods
+class CloseableClient:
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.closed = False
@@ -32,9 +33,7 @@ class CloseableClient:  # pylint: disable=too-few-public-methods
         self.closed = True
 
 
-class ExiteableClient(  # pylint: disable=too-few-public-methods
-    AbstractContextManager,  # type: ignore[type-arg]
-):
+class ExiteableClient(AbstractContextManager[Any]):
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.closed = False
@@ -43,11 +42,11 @@ class ExiteableClient(  # pylint: disable=too-few-public-methods
         self.closed = True
 
 
-Client = Union[CloseableClient, ExiteableClient]
+Client = CloseableClient | ExiteableClient
 
 
 class ValidClientManager(ClientManager[Client]):
-    def __init__(self, *args: Any, client_class: Type[Client], **kwargs: Any):
+    def __init__(self, *args: Any, client_class: type[Client], **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.client_class = client_class
 

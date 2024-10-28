@@ -4,7 +4,6 @@ Amazon Web Services Secrets Manager interface.
 Documentation: https://cloud.google.com/python/docs/reference/secretmanager/latest
 """
 from logging import getLogger
-from typing import Optional
 
 from stormware.amazon.auth import AWSAuth
 from stormware.secrets import SecretStore
@@ -15,8 +14,8 @@ logger = getLogger(__name__)
 class SecretsManager(SecretStore):  # pylint: disable=too-few-public-methods
     def __init__(
         self,
-        organization: Optional[str] = None,
-        auth: Optional[AWSAuth] = None,
+        organization: str | None = None,
+        auth: AWSAuth | None = None,
     ):
         """
         AWS Secrets Manager connector.

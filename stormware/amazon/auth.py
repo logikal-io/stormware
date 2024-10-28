@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Optional, Set
+from typing import Any
 
 from boto3.session import Session
 
@@ -16,12 +16,12 @@ class AWSAuth(Auth):
         Amazon Web Services authentication manager.
 
         Attributes:
-            profiles (Set[str]): The available named profiles.
+            profiles (set[str]): The available named profiles.
 
         """
         super().__init__(*args, **kwargs)
 
-        self.profiles: Set[str] = set()
+        self.profiles: set[str] = set()
         credentials = credentials.expanduser()
         if credentials.exists():
             config = ConfigParser()
@@ -30,7 +30,7 @@ class AWSAuth(Auth):
         else:
             logger.debug(f'Named profile credentials file "{credentials}" does not exist')
 
-    def profile(self, organization: Optional[str] = None) -> Optional[str]:
+    def profile(self, organization: str | None = None) -> str | None:
         """
         Return the profile name (same as the organization ID) or :data:`None` if it does not exist.
         """
@@ -39,7 +39,7 @@ class AWSAuth(Auth):
             logger.debug(f'Using named profile "{profile}"')
         return profile
 
-    def session(self, organization: Optional[str] = None, region: Optional[str] = None) -> Session:
+    def session(self, organization: str | None = None, region: str | None = None) -> Session:
         """
         Return a session that uses named profile credentials (if it exists).
         """

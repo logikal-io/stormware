@@ -8,7 +8,7 @@ Documentation:
 """
 from datetime import date
 from logging import getLogger
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, cast
 
 from googleapiclient.discovery import build
 from pandas import DataFrame
@@ -24,9 +24,9 @@ class Spreadsheet(ClientManager[Any]):
     def __init__(
         self,
         key: str,
-        organization: Optional[str] = None,
-        project: Optional[str] = None,
-        auth: Optional[GCPAuth] = None,
+        organization: str | None = None,
+        project: str | None = None,
+        auth: GCPAuth | None = None,
     ):
         """
         Google Sheets connector.
@@ -50,7 +50,7 @@ class Spreadsheet(ClientManager[Any]):
         client = build('sheets', 'v4', credentials=self.auth.credentials())
         return client.spreadsheets()  # pylint: disable=no-member
 
-    def add_sheet(self, name: str, properties: Optional[Dict[str, Any]] = None) -> int:
+    def add_sheet(self, name: str, properties: dict[str, Any] | None = None) -> int:
         """
         Add a new sheet to the spreadsheet.
         """
@@ -88,7 +88,7 @@ class Spreadsheet(ClientManager[Any]):
 
         Create a new sheet if necessary. Existing data in the sheet is dropped.
         """
-        updates: List[Dict[str, Any]] = []
+        updates: list[dict[str, Any]] = []
 
         # Sheet formatting
         properties = {'rowCount': data.shape[0] + 1, 'columnCount': data.shape[1]}
@@ -153,7 +153,7 @@ class Spreadsheet(ClientManager[Any]):
         dimensions = {'dimensions': {'dimension': 'COLUMNS', 'sheetId': sheet_id}}
         self.update([{'autoResizeDimensions': dimensions}])
 
-    def update(self, updates: List[Dict[str, Any]]) -> Any:
+    def update(self, updates: list[dict[str, Any]]) -> Any:
         logger.debug('Executing updates')
         return self.client.batchUpdate(
             spreadsheetId=self.key, body={'requests': updates},
@@ -167,7 +167,7 @@ class Spreadsheet(ClientManager[Any]):
             valueInputOption='RAW',
         ).execute()
 
-    def _sheet_id(self, name: str) -> Optional[int]:
+    def _sheet_id(self, name: str) -> int | None:
         response = self.client.get(spreadsheetId=self.key).execute()
         sheet_ids = [
             sheet['properties']['sheetId'] for sheet in response['sheets']
@@ -176,11 +176,11 @@ class Spreadsheet(ClientManager[Any]):
         return sheet_ids[0] if sheet_ids else None
 
     @staticmethod
-    def _format(  # pylint: disable=too-many-arguments
-        user_entered_format: Dict[str, Any], sheet_id: int,
-        start_row: Optional[int] = None, end_row: Optional[int] = None,
-        start_column: Optional[int] = None, end_column: Optional[int] = None,
-    ) -> Dict[str, Any]:
+    def _format(  # pylint: disable=too-many-arguments, too-many-positional-arguments
+        user_entered_format: dict[str, Any], sheet_id: int,
+        start_row: int | None = None, end_row: int | None = None,
+        start_column: int | None = None, end_column: int | None = None,
+    ) -> dict[str, Any]:
         return {
             'repeatCell': {
                 'range': {
@@ -189,6 +189,6 @@ class Spreadsheet(ClientManager[Any]):
                     'startColumnIndex': start_column, 'endColumnIndex': end_column,
                 },
                 'cell': {'userEnteredFormat': user_entered_format},
-                'fields': f'userEnteredFormat({",".join(user_entered_format.keys())})',
+                'fields': f'userEnteredFormat({','.join(user_entered_format.keys())})',
             },
         }

@@ -5,12 +5,11 @@ Documentation: https://google-auth.readthedocs.io/
 """
 from logging import getLogger
 from pathlib import Path
-from typing import Dict, Optional, Tuple
 
 from google.auth import default, load_credentials_from_file
 from google.auth.credentials import Credentials
 from logikal_utils.project import PYPROJECT, tool_config
-from xdg import xdg_config_home
+from xdg_base_dirs import xdg_config_home
 
 from stormware.auth import Auth
 
@@ -18,19 +17,19 @@ logger = getLogger(__name__)
 
 
 class GCPAuth(Auth):
-    def __init__(self, organization: Optional[str] = None, project: Optional[str] = None):
+    def __init__(self, organization: str | None = None, project: str | None = None):
         """
         Google Cloud Platform authentication manager.
         """
         super().__init__(organization=organization)
         self._project = project
         self._gcloud_config = xdg_config_home() / 'gcloud'
-        self._credentials: Dict[Tuple[str, str], Credentials] = {}
+        self._credentials: dict[tuple[str, str], Credentials] = {}
 
     def clear_cache(self) -> None:
         self._credentials = {}
 
-    def project(self, project: Optional[str] = None) -> str:
+    def project(self, project: str | None = None) -> str:
         """
         Return the project name.
 
@@ -46,7 +45,7 @@ class GCPAuth(Auth):
             raise ValueError('You must provide a project')
         return project
 
-    def project_id(self, organization: Optional[str] = None, project: Optional[str] = None) -> str:
+    def project_id(self, organization: str | None = None, project: str | None = None) -> str:
         """
         Return the project ID.
 
@@ -54,7 +53,7 @@ class GCPAuth(Auth):
         """
         return f'{self.project(project=project)}-{self.organization_id(organization)}'
 
-    def organization_credentials_path(self, organization: Optional[str] = None) -> Optional[Path]:
+    def organization_credentials_path(self, organization: str | None = None) -> Path | None:
         """
         Return the path to the organization credentials or :data:`None` if it does not exist.
 
@@ -65,7 +64,7 @@ class GCPAuth(Auth):
         return credentials_path if credentials_path.exists() else None
 
     def credentials(
-        self, organization: Optional[str] = None, project: Optional[str] = None,
+        self, organization: str | None = None, project: str | None = None,
     ) -> Credentials:
         """
         Return the organization credentials when they exist or the application default credentials.

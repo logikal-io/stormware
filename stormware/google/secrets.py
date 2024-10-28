@@ -4,10 +4,10 @@ Google Cloud Platform Secret Manager interface.
 Documentation: https://cloud.google.com/python/docs/reference/secretmanager/latest
 """
 from logging import getLogger
-from typing import Optional
 
 import google_crc32c
 from google.cloud.secretmanager import SecretManagerServiceClient
+from google.cloud.secretmanager_v1.types.service import AccessSecretVersionResponse
 
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
@@ -19,9 +19,9 @@ logger = getLogger(__name__)
 class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
     def __init__(
         self,
-        organization: Optional[str] = None,
-        project: Optional[str] = None,
-        auth: Optional[GCPAuth] = None,
+        organization: str | None = None,
+        project: str | None = None,
+        auth: GCPAuth | None = None,
     ):
         """
         Google Cloud Secret Manager connector.
@@ -42,6 +42,12 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
         client = SecretManagerServiceClient(credentials=self.auth.credentials())
         return client.__enter__()  # pylint: disable=unnecessary-dunder-call
 
+    @staticmethod
+    def _check_integrity(response: AccessSecretVersionResponse) -> bool:
+        checksum = google_crc32c.Checksum(response.payload.data)  # type: ignore[no-untyped-call]
+        checksum_hex = checksum.hexdigest()  # type: ignore[no-untyped-call]
+        return response.payload.data_crc32c == int(checksum_hex, 16)
+
     def __getitem__(self, key: str) -> str:
         """
         Retrieve the secret under the given key.
@@ -49,8 +55,7 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
         logger.debug(f'Loading secret "{key}"')
         response = self.client.access_secret_version(name=self._secret_version_path(key))
 
-        payload_crc32c = google_crc32c.Checksum(response.payload.data)
-        if response.payload.data_crc32c != int(payload_crc32c.hexdigest(), 16):
+        if not self._check_integrity(response):
             raise RuntimeError('Data corruption detected')
 
         return response.payload.data.decode('utf-8')
