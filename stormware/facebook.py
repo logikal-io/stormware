@@ -9,7 +9,7 @@ Documentation:
 """
 import json
 from logging import getLogger
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any
 
 import pandas as pd
 from facebook_business import FacebookAdsApi, FacebookSession
@@ -24,9 +24,9 @@ logger = getLogger(__name__)
 class FacebookAds:
     def __init__(  # nosec: we only have a hardcoded path to a secret, not a secret
         self,
-        account_name: Optional[str] = None,
+        account_name: str | None = None,
         secret_key: str = 'stormware-facebook',
-        secret_store: Optional[SecretStore] = None,
+        secret_store: SecretStore | None = None,
     ):
         """
         Facebook Ads connector.
@@ -56,9 +56,9 @@ class FacebookAds:
         logger.info('Loading Facebook Ads accounts')
         user = BusinessUser(fbid='me', api=self.api)
         accounts = user.get_assigned_ad_accounts(fields=['id', 'name'])
-        self.ad_accounts: Dict[str, str] = {account['name']: account['id'] for account in accounts}
+        self.ad_accounts: dict[str, str] = {account['name']: account['id'] for account in accounts}
 
-    def account_id(self, account_name: Optional[str] = None) -> str:
+    def account_id(self, account_name: str | None = None) -> str:
         """
         Return the account ID for a given account name.
         """
@@ -69,9 +69,9 @@ class FacebookAds:
         return self.ad_accounts[account_name]
 
     def report(  # pylint: disable=too-many-arguments
-        self, metrics: List[str], dimensions: Optional[List[str]] = None,
-        statistics: Optional[List[str]] = None, parameters: Optional[Mapping[str, Any]] = None,
-        account_name: Optional[str] = None, account_id: Optional[str] = None,
+        self, *, metrics: list[str], dimensions: list[str] | None = None,
+        statistics: list[str] | None = None, parameters: dict[str, Any] | None = None,
+        account_name: str | None = None, account_id: str | None = None,
     ) -> pd.DataFrame:
         """
         Return a Facebook report.

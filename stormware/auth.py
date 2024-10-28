@@ -1,13 +1,11 @@
-from typing import Optional
-
 from logikal_utils.project import tool_config
 
 
 class Auth:
-    def __init__(self, organization: Optional[str] = None):
+    def __init__(self, organization: str | None = None):
         self._organization = organization
 
-    def organization(self, organization: Optional[str] = None) -> str:
+    def organization(self, organization: str | None = None) -> str:
         """
         Return the organization name.
 
@@ -22,7 +20,7 @@ class Auth:
             raise ValueError('You must provide an organization')
         return organization
 
-    def organization_id(self, organization: Optional[str] = None) -> str:
+    def organization_id(self, organization: str | None = None) -> str:
         """
         Return the organization ID.
 

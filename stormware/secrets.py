@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from contextlib import nullcontext
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any
 
 logger = getLogger(__name__)
 
@@ -15,7 +15,7 @@ class SecretStore(ABC):  # pylint: disable=too-few-public-methods
 
 
 # Note: return type could be replaced with an AbstractContextManager[SecretStore] in Python 3.9+
-def default_secret_store(secret_store: Optional[SecretStore] = None) -> Any:
+def default_secret_store(secret_store: SecretStore | None = None) -> Any:
     """
     Return a secret store that can be used with a context manager.
     """

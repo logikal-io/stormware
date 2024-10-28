@@ -4,7 +4,6 @@ Google Cloud Platform BigQuery interface.
 Documentation: https://cloud.google.com/python/docs/reference/bigquery/latest
 """
 from logging import getLogger
-from typing import Optional
 
 from google.cloud import bigquery
 from pandas import DataFrame
@@ -18,9 +17,9 @@ logger = getLogger(__name__)
 class BigQuery(ClientManager[bigquery.Client]):
     def __init__(
         self,
-        organization: Optional[str] = None,
-        project: Optional[str] = None,
-        auth: Optional[GCPAuth] = None,
+        organization: str | None = None,
+        project: str | None = None,
+        auth: GCPAuth | None = None,
     ):
         """
         Google BigQuery connector.
