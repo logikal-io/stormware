@@ -113,16 +113,17 @@ def test_mkdir(drive: Drive, drive_root: DrivePath, subpath: str) -> None:
 
     # Create folder
     path = drive.mkdir(drive_path)
-    assert drive.exists(path)
     sleep(5)  # wait for consistency
+    assert drive.exists(path)
 
     # Try creating the same folder again (should not create a duplicate)
     path = drive.mkdir(drive_path)
-    assert drive.exists(path)
     sleep(5)  # wait for consistency
+    assert drive.exists(path)
 
     # Move folder to trash
     drive.remove(path, use_trash=False)
+    sleep(5)  # wait for consistency
     assert not drive.exists(path)
 
     # Delete parent folder of subfolder
