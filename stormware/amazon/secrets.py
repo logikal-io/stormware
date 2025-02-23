@@ -1,7 +1,8 @@
 """
 Amazon Web Services Secrets Manager interface.
 
-Documentation: https://cloud.google.com/python/docs/reference/secretmanager/latest
+Documentation:
+https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html
 """
 from logging import getLogger
 

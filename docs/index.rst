@@ -61,7 +61,7 @@ Finally, we push the data into the desired spreadsheet:
 
     from stormware.google.sheets import Spreadsheet
 
-    with Spreadsheet(key='1YKTWQtHk7cBIcWoy3VlHTKQvkhKXUtE8iQDmGK3pIkY') as sheet:
+    with Spreadsheet(key='1VV0cBAVeFTA5WUXYLvwmgZJtv-vV-q2uYr40lDAH3HA') as sheet:
         sheet.set_sheet(name='Facebook Campaign', data=report)
 
 Of course, if we wanted to push the data into Google BigQuery as well, it would be equally easy:

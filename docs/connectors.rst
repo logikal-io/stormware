@@ -49,6 +49,14 @@ Google BigQuery
 ~~~~~~~~~~~~~~~
 .. autoclass:: stormware.google.bigquery.BigQuery
 
+Google Drive
+~~~~~~~~~~~~~
+.. autoclass:: stormware.google.drive.DrivePath
+    :show-inheritance:
+    :no-inherited-members:
+
+.. autoclass:: stormware.google.drive.Drive
+
 Google Secret Manager
 ~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: stormware.google.secrets.SecretManager
