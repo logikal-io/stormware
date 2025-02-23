@@ -109,14 +109,17 @@ def test_mkdir(drive: Drive, drive_root: DrivePath, subpath: str) -> None:
     # Prepare clean destinations
     drive.remove(drive_path, missing_ok=True)
     assert not drive.exists(drive_path)
+    sleep(5)  # wait for consistency
 
     # Create folder
     path = drive.mkdir(drive_path)
     assert drive.exists(path)
+    sleep(5)  # wait for consistency
 
     # Try creating the same folder again (should not create a duplicate)
     path = drive.mkdir(drive_path)
     assert drive.exists(path)
+    sleep(5)  # wait for consistency
 
     # Move folder to trash
     drive.remove(path, use_trash=False)
