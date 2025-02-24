@@ -23,8 +23,21 @@ def test_query() -> None:
     ))
 
 
+def test_integration(gmail: Gmail) -> None:
+    messages = gmail.messages(
+        query=Query(
+            sender='non-existent-sender@logikal.io',
+            to='non-existent-to@logikal.io',
+            subject='Non-existent Subject',
+            timestamp_from=datetime(2025, 1, 1, tzinfo=timezone.utc),
+            timestamp_to=datetime(2025, 1, 15, tzinfo=timezone.utc),
+        ),
+    )
+    assert messages == []
+
+
 @mark.skip(reason="these email messages are specific to Gergely's account")
-def test_integration(gmail: Gmail, tmp_path: Path) -> None:
+def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:
     messages = sorted(gmail.messages(
         query=Query(
             sender='payments-noreply@google.com',
@@ -65,7 +78,7 @@ def test_integration(gmail: Gmail, tmp_path: Path) -> None:
         )
 
 
-def test_messages(gmail: Gmail, mocker: MockerFixture) -> None:
+def test_messages(mocker: MockerFixture) -> None:
     client = mocker.patch('stormware.google.gmail.Gmail.create_client').return_value
     client.users.return_value.messages.return_value.list.return_value.execute.side_effect = [
         {'messages': [{'id': 'message_1', 'threadId': 'thread_1'}], 'nextPageToken': 'token'},
@@ -79,7 +92,7 @@ def test_messages(gmail: Gmail, mocker: MockerFixture) -> None:
         ]
 
 
-def test_message(gmail: Gmail, mocker: MockerFixture) -> None:
+def test_message(mocker: MockerFixture) -> None:
     timestamp = datetime(2025, 2, 15, 10, 45, 35, tzinfo=timezone.utc)
     client = mocker.patch('stormware.google.gmail.Gmail.create_client').return_value
     client.users.return_value.messages.return_value.get.return_value.execute.return_value = {
@@ -105,7 +118,7 @@ def test_message(gmail: Gmail, mocker: MockerFixture) -> None:
         )
 
 
-def test_download_attachment(gmail: Gmail, mocker: MockerFixture, tmp_path: Path) -> None:
+def test_download_attachment(mocker: MockerFixture, tmp_path: Path) -> None:
     test_file = Path(__file__).parents[1] / 'data/test_file.txt'
     data = base64.urlsafe_b64encode(test_file.read_bytes())
     client = mocker.patch('stormware.google.gmail.Gmail.create_client').return_value
