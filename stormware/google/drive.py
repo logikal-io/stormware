@@ -110,7 +110,7 @@ class Drive(ClientManager[Any]):
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
     def create_client(self) -> Any:
-        return build('drive', 'v3', credentials=self.auth.credentials())
+        return build('drive', 'v3', credentials=self.auth.credentials(), cache_discovery=False)
 
     def _drive_id(self, name: str) -> str:
         if name in self._drive_id_cache:
