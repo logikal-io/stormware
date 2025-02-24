@@ -1,11 +1,9 @@
 """
 Google Sheets API connector.
-
-Documentation:
-- Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
-- Drive API: https://developers.google.com/drive/api
-
 """
+# Documentation:
+# - Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
+# - Drive API: https://developers.google.com/drive/api
 from collections import defaultdict
 from logging import getLogger
 from os import PathLike
@@ -120,7 +118,7 @@ class Drive(ClientManager[Any]):
             query = f"name = '{self._escape_query_parameter(name)}'"
             response = self.client.drives().list(q=query).execute()  # pylint: disable=no-member
             if not (drives := response.get('drives')):
-                raise RuntimeError(f'Shared drive "{name}" not found')
+                raise FileNotFoundError(f'Shared drive "{name}" not found')
             if len(drives) > 1:
                 raise RuntimeError(f'Shared drive name "{name}" is not unique')
             drive_id = cast(str, drives[0]['id'])
@@ -298,7 +296,7 @@ class Drive(ClientManager[Any]):
         if (file_ids := existing_file_ids.get(src.name, [])):
             dst_path = dst / src.name
             if overwrite is None:
-                raise RuntimeError(f'File "{dst_path}" already exists')
+                raise FileExistsError(f'File "{dst_path}" already exists')
             if overwrite is False:
                 logger.info(f'Skipping uploading existing file "{dst_path}"')
                 return

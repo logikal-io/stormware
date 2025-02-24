@@ -1,12 +1,10 @@
 """
 Facebook API connector.
-
-Documentation:
-- Python Business SDK: https://github.com/facebook/facebook-python-business-sdk
-- Marketing API: https://developers.facebook.com/docs/marketing-apis
-- Changelog: https://developers.facebook.com/docs/graph-api/changelog
-
 """
+# Documentation:
+# - Python Business SDK: https://github.com/facebook/facebook-python-business-sdk
+# - Marketing API: https://developers.facebook.com/docs/marketing-apis
+# - Changelog: https://developers.facebook.com/docs/graph-api/changelog
 import json
 from logging import getLogger
 from typing import Any

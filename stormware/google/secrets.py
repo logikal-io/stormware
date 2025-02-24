@@ -1,8 +1,7 @@
 """
 Google Cloud Platform Secret Manager interface.
-
-Documentation: https://cloud.google.com/python/docs/reference/secretmanager/latest
 """
+# Documentation: https://cloud.google.com/python/docs/reference/secretmanager/latest
 from logging import getLogger
 
 import google_crc32c

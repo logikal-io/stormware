@@ -1,9 +1,8 @@
 """
 Amazon Web Services Secrets Manager interface.
-
-Documentation:
-https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html
 """
+# Documentation:
+# https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html
 from logging import getLogger
 
 from stormware.amazon.auth import AWSAuth

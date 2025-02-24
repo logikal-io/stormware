@@ -11,7 +11,7 @@ from stormware.google.drive import Drive, DrivePath
 logger = getLogger(__name__)
 
 # Local paths
-TEST_FOLDER_PATH = Path(__file__).parent / 'Stormware Test - upload'
+TEST_FOLDER_PATH = Path(__file__).parents[1] / 'data/Stormware Test - upload'
 TEST_FILE_PATH = TEST_FOLDER_PATH / 'Stormware Test - upload.txt'
 
 # Google Drive paths
@@ -70,7 +70,7 @@ def test_log_info() -> None:
 
 
 def test_drive_not_found(drive: Drive) -> None:
-    with raises(RuntimeError, match='not found'):
+    with raises(FileNotFoundError, match='not found'):
         drive.exists(DrivePath('//Non-Existent Test Drive'))
 
 
@@ -207,7 +207,7 @@ def test_upload(drive: Drive, drive_root: DrivePath) -> None:
         sleep(5)  # wait for consistency
 
         # Upload again without overwrite
-        with raises(RuntimeError, match='already exists'):
+        with raises(FileExistsError, match='already exists'):
             drive.upload(src=src, dst=dst)
 
         # Clean up user drive

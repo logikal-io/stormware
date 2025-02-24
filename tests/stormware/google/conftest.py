@@ -3,6 +3,7 @@ from collections.abc import Iterator
 from pytest import fixture
 
 from stormware.google.drive import Drive
+from stormware.google.gmail import Gmail
 from stormware.google.sheets import Spreadsheet
 
 # Shared drives > Logikal > Software Engineering > Stormware > Test Sheet
@@ -19,3 +20,9 @@ def sheet() -> Iterator[Spreadsheet]:
 def drive() -> Iterator[Drive]:
     with Drive() as drive_obj:
         yield drive_obj
+
+
+@fixture
+def gmail() -> Iterator[Gmail]:
+    with Gmail() as gmail_obj:
+        yield gmail_obj

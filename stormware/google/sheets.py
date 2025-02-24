@@ -1,11 +1,9 @@
 """
 Google Sheets API connector.
-
-Documentation:
-- Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
-- Sheets API: https://developers.google.com/sheets/api
-
 """
+# Documentation:
+# - Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
+# - Sheets API: https://developers.google.com/sheets/api
 from datetime import date
 from logging import getLogger
 from typing import Any, cast

@@ -1,8 +1,7 @@
 """
 Google Cloud Platform BigQuery interface.
-
-Documentation: https://cloud.google.com/python/docs/reference/bigquery/latest
 """
+# Documentation: https://cloud.google.com/python/docs/reference/bigquery/latest
 from logging import getLogger
 
 from google.cloud import bigquery
