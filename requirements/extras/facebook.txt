@@ -1,1 +1,1 @@
-facebook-business==21.0.3
+facebook-business==22.0.2
