@@ -108,8 +108,8 @@ def test_mkdir(drive: Drive, drive_root: DrivePath, subpath: str) -> None:
 
     # Prepare clean destinations
     drive.remove(drive_path, missing_ok=True)
-    assert not drive.exists(drive_path)
     sleep(5)  # wait for consistency
+    assert not drive.exists(drive_path)
 
     # Create folder
     path = drive.mkdir(drive_path)
@@ -121,14 +121,16 @@ def test_mkdir(drive: Drive, drive_root: DrivePath, subpath: str) -> None:
     sleep(5)  # wait for consistency
     assert drive.exists(path)
 
-    # Move folder to trash
-    drive.remove(path, use_trash=False)
-    sleep(5)  # wait for consistency
-    assert not drive.exists(path)
+    # Clean up user drive
+    if not drive_root.drive:
+        # Move folder to trash
+        drive.remove(path, use_trash=False)
+        sleep(5)  # wait for consistency
+        assert not drive.exists(path)
 
-    # Delete parent folder of subfolder
-    if 'subfolder' in subpath:
-        drive.remove(path.parent, use_trash=False)
+        # Delete parent folder of subfolder
+        if 'subfolder' in subpath:
+            drive.remove(path.parent, use_trash=False)
 
 
 @mark.parametrize('drive_path', [
@@ -181,8 +183,8 @@ def test_upload(drive: Drive, drive_root: DrivePath) -> None:
 
         # Prepare clean destinations
         drive.remove(dst / src.name, missing_ok=True)
-        assert not drive.exists(dst / src.name)
         sleep(5)  # wait for consistency
+        assert not drive.exists(dst / src.name)
 
         # Upload source path
         path = drive.upload(src=src, dst=dst)
