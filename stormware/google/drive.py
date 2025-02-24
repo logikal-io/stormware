@@ -300,7 +300,7 @@ class Drive(ClientManager[Any]):
             if overwrite is None:
                 raise RuntimeError(f'File "{dst_path}" already exists')
             if overwrite is False:
-                logger.debug(f'Skipping uploading existing file "{dst_path}"')
+                logger.info(f'Skipping uploading existing file "{dst_path}"')
                 return
 
             logger.info(f'Moving existing file "{dst_path}" to trash')
