@@ -189,22 +189,24 @@ def test_upload(drive: Drive, drive_root: DrivePath) -> None:
         sleep(5)  # wait for consistency
 
         # Check uploaded files
-        if src.is_file():
-            assert drive.exists(path)
-        elif src.is_dir():
+        assert drive.exists(path)
+        if src.is_dir():
             for src_path, _, filenames in src.walk():
                 dst_folder = dst / src.name / src_path.relative_to(src)
                 assert drive.exists(dst_folder)
                 for filename in filenames:
                     assert drive.exists(dst_folder / filename)
 
-        # Upload again with overwrite
+        # Upload again (with skipping)
+        drive.upload(src=src, dst=dst, overwrite=False)
+
+        # Upload again (with overwrite)
         drive.upload(src=src, dst=dst, overwrite=True)
         sleep(5)  # wait for consistency
 
         # Upload again without overwrite
         with raises(RuntimeError, match='already exists'):
-            drive.upload(src=src, dst=dst, overwrite=False)
+            drive.upload(src=src, dst=dst)
 
         # Clean up user drive
         if not dst.drive:

@@ -285,9 +285,31 @@ class Drive(ClientManager[Any]):
         logger.debug(f'Created path file ID: {parent_id}')
         return parent_id
 
-    def _upload_file(self, src: Path, parent_id: str) -> None:
+    def _upload_file(  # pylint: disable=too-many-arguments
+        self,
+        *,
+        src: Path,
+        dst: DrivePath,
+        parent_id: str,
+        existing_file_ids: dict[str, list[str]],
+        overwrite: bool | None,
+    ) -> None:
+        # Handling overwrites
+        if (file_ids := existing_file_ids.get(src.name, [])):
+            dst_path = dst / src.name
+            if overwrite is None:
+                raise RuntimeError(f'File "{dst_path}" already exists')
+            if overwrite is False:
+                logger.debug(f'Skipping uploading existing file "{dst_path}"')
+                return
+
+            logger.info(f'Moving existing file "{dst_path}" to trash')
+            for file_id in file_ids:
+                self._remove_file(file_id=file_id, use_trash=True)
+
+        # Uploading
         logger.debug(f'Uploading file "{src}" to "{parent_id}"')
-        response = self.client.files().create(
+        response = self.client.files().create(  # pylint: disable=no-member
             body={'name': src.name, 'parents': [parent_id]},
             media_body=MediaFileUpload(str(src)),
             fields='id',
@@ -295,20 +317,7 @@ class Drive(ClientManager[Any]):
         ).execute()
         logger.debug(f'Uploaded file ID: {response.get('id')}')
 
-    def _overwrite(
-        self,
-        file_ids: dict[str, list[str]],
-        name: str,
-        dst: DrivePath,
-        overwrite: bool,
-    ) -> None:
-        for file_id in file_ids.get(name, []):
-            if not overwrite:
-                raise RuntimeError(f'File "{dst / name}" already exists')
-            logger.info(f'Moving existing file "{dst / name}" to trash')
-            self._remove_file(file_id=file_id, use_trash=True)
-
-    def _upload_file_to_path(self, src: Path, dst: DrivePath, overwrite: bool) -> None:
+    def _upload_file_to_path(self, src: Path, dst: DrivePath, overwrite: bool | None) -> None:
         logger.info(f'Uploading file "{src}" to "{dst}"')
         parent_id = self._create_folder_at_path(dst)
         logger.debug(f'Loading existing file IDs in "{dst}"')
@@ -319,10 +328,12 @@ class Drive(ClientManager[Any]):
             folders=None,
             in_trash=False,
         )
-        self._overwrite(file_ids=file_ids, name=src.name, dst=dst, overwrite=overwrite)
-        self._upload_file(src=src, parent_id=parent_id)
+        self._upload_file(
+            src=src, dst=dst, parent_id=parent_id,
+            existing_file_ids=file_ids, overwrite=overwrite,
+        )
 
-    def _upload_folder_to_path(self, src: Path, dst: DrivePath, overwrite: bool) -> None:
+    def _upload_folder_to_path(self, src: Path, dst: DrivePath, overwrite: bool | None) -> None:
         logger.info(f'Uploading folder "{src}" to "{dst}"')
         drive_id = self._drive_id(dst.drive) if dst.drive else None
         for path, _, filenames in src.walk():
@@ -336,8 +347,10 @@ class Drive(ClientManager[Any]):
             )
             for name in filenames:
                 logger.info(f'Uploading file "{path / name}" to "{dst_folder}"')
-                self._overwrite(file_ids=file_ids, name=name, dst=dst_folder, overwrite=overwrite)
-                self._upload_file(src=path / name, parent_id=parent_id)
+                self._upload_file(
+                    src=path / name, dst=dst_folder, parent_id=parent_id,
+                    existing_file_ids=file_ids, overwrite=overwrite,
+                )
 
     def exists(self, path: DrivePath, in_trash: bool = False) -> bool:
         """
@@ -393,7 +406,7 @@ class Drive(ClientManager[Any]):
         elif not missing_ok:
             raise FileNotFoundError(f'No such file or folder: \'{path}\'')
 
-    def upload(self, src: Path, dst: DrivePath, overwrite: bool = True) -> DrivePath:
+    def upload(self, src: Path, dst: DrivePath, overwrite: bool | None = None) -> DrivePath:
         """
         Upload a file or directory to Google Drive and return the Google Drive path pointing to it.
 
