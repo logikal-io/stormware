@@ -1,11 +1,9 @@
 """
 Google Sheets API connector.
-
-Documentation:
-- Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
-- Drive API: https://developers.google.com/drive/api
-
 """
+# Documentation:
+# - Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
+# - Drive API: https://developers.google.com/drive/api
 from collections import defaultdict
 from logging import getLogger
 from os import PathLike
@@ -110,7 +108,7 @@ class Drive(ClientManager[Any]):
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
     def create_client(self) -> Any:
-        return build('drive', 'v3', credentials=self.auth.credentials())
+        return build('drive', 'v3', credentials=self.auth.credentials(), cache_discovery=False)
 
     def _drive_id(self, name: str) -> str:
         if name in self._drive_id_cache:
@@ -120,7 +118,7 @@ class Drive(ClientManager[Any]):
             query = f"name = '{self._escape_query_parameter(name)}'"
             response = self.client.drives().list(q=query).execute()  # pylint: disable=no-member
             if not (drives := response.get('drives')):
-                raise RuntimeError(f'Shared drive "{name}" not found')
+                raise FileNotFoundError(f'Shared drive "{name}" not found')
             if len(drives) > 1:
                 raise RuntimeError(f'Shared drive name "{name}" is not unique')
             drive_id = cast(str, drives[0]['id'])
@@ -298,9 +296,9 @@ class Drive(ClientManager[Any]):
         if (file_ids := existing_file_ids.get(src.name, [])):
             dst_path = dst / src.name
             if overwrite is None:
-                raise RuntimeError(f'File "{dst_path}" already exists')
+                raise FileExistsError(f'File "{dst_path}" already exists')
             if overwrite is False:
-                logger.debug(f'Skipping uploading existing file "{dst_path}"')
+                logger.info(f'Skipping uploading existing file "{dst_path}"')
                 return
 
             logger.info(f'Moving existing file "{dst_path}" to trash')

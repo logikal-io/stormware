@@ -65,3 +65,7 @@ Google Secret Manager
 Google Sheets
 ~~~~~~~~~~~~~
 .. autoclass:: stormware.google.sheets.Spreadsheet
+
+Gmail
+~~~~~
+.. automodule:: stormware.google.gmail

@@ -1,8 +1,7 @@
 """
 Google Cloud Platform authentication.
-
-Documentation: https://google-auth.readthedocs.io/
 """
+# Documentation: https://google-auth.readthedocs.io/
 from logging import getLogger
 from pathlib import Path
 

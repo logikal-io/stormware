@@ -1,11 +1,9 @@
 """
 Google Sheets API connector.
-
-Documentation:
-- Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
-- Sheets API: https://developers.google.com/sheets/api
-
 """
+# Documentation:
+# - Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
+# - Sheets API: https://developers.google.com/sheets/api
 from datetime import date
 from logging import getLogger
 from typing import Any, cast
@@ -47,7 +45,7 @@ class Spreadsheet(ClientManager[Any]):
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
     def create_client(self) -> Any:
-        client = build('sheets', 'v4', credentials=self.auth.credentials())
+        client = build('sheets', 'v4', credentials=self.auth.credentials(), cache_discovery=False)
         return client.spreadsheets()  # pylint: disable=no-member
 
     def add_sheet(self, name: str, properties: dict[str, Any] | None = None) -> int:

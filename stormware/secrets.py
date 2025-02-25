@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from contextlib import nullcontext
+from contextlib import AbstractContextManager, nullcontext
 from logging import getLogger
-from typing import Any
 
 logger = getLogger(__name__)
 
@@ -14,8 +13,9 @@ class SecretStore(ABC):  # pylint: disable=too-few-public-methods
         """
 
 
-# Note: return type could be replaced with an AbstractContextManager[SecretStore] in Python 3.9+
-def default_secret_store(secret_store: SecretStore | None = None) -> Any:
+def default_secret_store(
+    secret_store: SecretStore | None = None,
+) -> AbstractContextManager[SecretStore]:
     """
     Return a secret store that can be used with a context manager.
     """
@@ -25,7 +25,7 @@ def default_secret_store(secret_store: SecretStore | None = None) -> Any:
         from stormware.google.secrets import (  # pylint: disable=import-outside-toplevel
             SecretManager,
         )
-        return SecretManager()
+        return SecretManager()  # type: ignore[return-value]
     except ImportError:
         logger.debug('Cannot import Google Cloud Secret Manager')
     try:
