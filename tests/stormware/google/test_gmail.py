@@ -25,7 +25,7 @@ def test_query() -> None:
 
 
 @mark.xfail(os.getenv('GITHUB_ACTIONS') == 'true', reason='might be an auth token scope problem')
-def test_integration(gmail: Gmail) -> None:
+def test_integration(gmail: Gmail) -> None:  # pragma: no cov
     messages = gmail.messages(
         query=Query(
             sender='non-existent-sender@logikal.io',
@@ -39,7 +39,7 @@ def test_integration(gmail: Gmail) -> None:
 
 
 @mark.skip(reason="these email messages are specific to Gergely's account")
-def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:
+def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
     messages = sorted(gmail.messages(
         query=Query(
             sender='payments-noreply@google.com',

@@ -64,4 +64,7 @@ filterwarnings = [
 jupyter-sphinx = '.*'  # should be removed after updating to jupyter-sphinx >0.5.3
 
 [tool.coverage.report]
-exclude_lines = ['\.\.\.']  # exclude abstract methods
+exclude_lines = [
+  'pragma: no cov',
+  '\.\.\.',  # exclude abstract methods
+]
