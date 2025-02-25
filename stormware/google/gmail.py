@@ -193,7 +193,7 @@ class Gmail(ClientManager[Any]):
         *,
         dst: Path,
         filename: str | None = None,
-        overwrite: bool = False,
+        overwrite: bool | None = None,
         user_id: str = 'me',
     ) -> Path:
         """
@@ -203,14 +203,19 @@ class Gmail(ClientManager[Any]):
             attachment: The attachment information object.
             dst: The destination folder to use.
             filename: The filename to use. Defaults to using the attachment filename.
-            overwrite: Whether to overwrite existing files or raise a :class:`FileExistsError`.
+            overwrite: Whether to overwrite existing files.
+                Raises a :class:`FileExistsError` by default.
             user_id: The user ID to use.
 
         """
         dst_path = dst / (filename or attachment.filename)
         dst_full_path = dst_path.expanduser()
-        if dst_full_path.exists() and not overwrite:
-            raise FileExistsError(f'Destination file "{dst_path}" already exists')
+        if dst_full_path.exists():
+            if overwrite is None:
+                raise FileExistsError(f'Destination file "{dst_path}" already exists')
+            if overwrite is False:
+                logger.info(f'Skipping downloading existing file "{dst_path}"')
+                return dst_path
 
         logger.info(
             f'Downloading attachment of message "{attachment.message_id}" of user "{user_id}" '
