@@ -27,6 +27,10 @@ resource "google_project_service" "gmail" {
   service = "gmail.googleapis.com"
 }
 
+resource "google_project_service" "cloud_sql" {
+  service = "sqladmin.googleapis.com"
+}
+
 # GitHub Actions
 module "gcp_github_auth" {
   source = "github.com/logikal-io/terraform-modules//gcp/github-auth?ref=v1.15.0"
