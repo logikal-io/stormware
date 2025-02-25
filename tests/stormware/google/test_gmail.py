@@ -134,5 +134,8 @@ def test_download_attachment(mocker: MockerFixture, tmp_path: Path) -> None:
         path = gmail.download_attachment(attachment, dst=tmp_path)
         assert path.read_text() == test_file.read_text()
 
+        path = gmail.download_attachment(attachment, dst=tmp_path, overwrite=False)  # skip
+        assert path.exists()
+
         with raises(FileExistsError):
             gmail.download_attachment(attachment, dst=tmp_path)
