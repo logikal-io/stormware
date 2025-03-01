@@ -30,7 +30,10 @@ credentials.
     <https://github.com/logikal-io/ansible-public-playbooks/blob/main/roles/gcp/files/bin/gcpl>`_
     for creating a credentials file. Note that you need to add the ``-s stormware`` option if you
     are using Google connectors that are not related to the Google Cloud Platform (for example, the
-    :ref:`connectors:Google Sheets` or the :ref:`connectors:Gmail` connector).
+    :ref:`connectors:Google Sheets` or the :ref:`connectors:Gmail` connector). In this case you
+    should also configure your `OAuth 2.0 client credentials
+    <https://cloud.google.com/solutions/sap/docs/abap-sdk/on-premises-or-any-cloud/latest/authentication-oauth-client-credentials>`_
+    and provide the path to the client ID credentials file when invoking ``gcpl`` via the ``-i`` option.
 
 A default configuration, organization and project can be set under the ``tool.stormware`` section
 of a project's ``pyproject.toml`` file as follows:
