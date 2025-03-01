@@ -40,7 +40,7 @@ class Attachment:
 
 
 @dataclass(order=True)
-class Message:
+class Message:  # pylint: disable=too-many-instance-attributes
     """
     Represents an email message.
     """
