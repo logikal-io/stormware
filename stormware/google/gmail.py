@@ -46,6 +46,7 @@ class Message:
     """
     id: str
     thread_id: str | None = None
+    subject: str | None = None
     plain_text: str | None = None
     html_text: str | None = None
     timestamp: datetime | None = None
@@ -171,7 +172,7 @@ class Gmail(ClientManager[Any]):
         fields = ', '.join([
             'id', 'threadId', 'labelIds', 'internalDate',
             f'payload({', '.join([
-                'partId', 'mimeType', 'filename', 'body(data)',
+                'partId', 'headers', 'mimeType', 'filename', 'body(data)',
                 f'parts({', '.join([
                     'partId', 'mimeType', 'filename', 'body(data, attachmentId)',
                     'parts(partId, mimeType, filename, body(data))',
@@ -193,8 +194,12 @@ class Gmail(ClientManager[Any]):
             attachments=[],
         )
 
+        headers = response.get('payload', {}).get('headers', {})
+        if items := [header['value'] for header in headers if header['name'].lower() == 'subject']:
+            message.subject = items[0]
+
         # Process message parts
-        for part in response.get('payload').get('parts', []):
+        for part in response.get('payload', {}).get('parts', []):
             if 'attachmentId' in part.get('body', {}):
                 message.attachments.append(  # type: ignore[union-attr]
                     Attachment(

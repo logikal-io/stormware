@@ -38,7 +38,7 @@ def test_integration(gmail: Gmail) -> None:  # pragma: no cov
     assert messages == []
 
 
-@mark.skip(reason="these email messages are specific to Gergely's account")
+# @mark.skip(reason="these email messages are specific to Gergely's account")
 def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
     messages = sorted(gmail.messages(
         query=Query(
@@ -58,6 +58,8 @@ def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:  # pragma: 
     message = gmail.message(messages[0])
     assert message.id == '194254ea8cff4383'
     assert message.thread_id == '194254ea8cff4383'
+    assert message.subject
+    assert message.subject.startswith('Google Cloud Platform & APIs')
     assert message.plain_text
     assert message.html_text
     assert message.plain_text.startswith('Google Cloud Platform & APIs')
@@ -111,19 +113,22 @@ def test_message(mocker: MockerFixture) -> None:
         'id': 'message_1',
         'threadId': 'thread_1',
         'labelIds': ['label_1', 'label_2'],
-        'payload': {'parts': [
-            {
-                'mimeType': 'application/pdf', 'filename': 'file.pdf',
-                'body': {'attachmentId': 'attachment_1'},
-            },
-            {
-                'mimeType': 'multipart/alternative',
-                'parts': [
-                    {'mimeType': 'text/plain', 'body': {'data': plain_text_data}},
-                    {'mimeType': 'text/html', 'body': {'data': html_text_data}},
-                ]
-            },
-        ]},
+        'payload': {
+            'headers': [{'name': 'Subject', 'value': 'Message subject'}],
+            'parts': [
+                {
+                    'mimeType': 'application/pdf', 'filename': 'file.pdf',
+                    'body': {'attachmentId': 'attachment_1'},
+                },
+                {
+                    'mimeType': 'multipart/alternative',
+                    'parts': [
+                        {'mimeType': 'text/plain', 'body': {'data': plain_text_data}},
+                        {'mimeType': 'text/html', 'body': {'data': html_text_data}},
+                    ]
+                },
+            ],
+        },
         'internalDate': timestamp.timestamp() * 1000,
     }
     with Gmail() as gmail:
@@ -131,6 +136,7 @@ def test_message(mocker: MockerFixture) -> None:
         assert message == Message(
             id='message_1',
             thread_id='thread_1',
+            subject='Message subject',
             plain_text=plain_text,
             html_text=html_text,
             timestamp=timestamp,
