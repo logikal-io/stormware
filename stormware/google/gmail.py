@@ -46,9 +46,25 @@ class Message:
     """
     id: str
     thread_id: str | None = None
+    plain_text: str | None = None
+    html_text: str | None = None
     timestamp: datetime | None = None
     labels: list[Label] | None = None
     attachments: list[Attachment] | None = None
+
+    @staticmethod
+    def _decode_part_body_data(part: dict[str, dict[str, str]]) -> str:
+        return base64.urlsafe_b64decode(part['body']['data']).decode('utf-8')
+
+    def add_part(self, part: dict[str, Any]) -> None:
+        mime_type = part.get('mimeType')
+        if mime_type == 'text/plain':
+            self.plain_text = self._decode_part_body_data(part)
+        elif mime_type == 'text/html':
+            self.html_text = self._decode_part_body_data(part)
+        elif mime_type == 'multipart/alternative':
+            for subpart in part['parts']:
+                self.add_part(subpart)
 
 
 @dataclass
@@ -155,9 +171,10 @@ class Gmail(ClientManager[Any]):
         fields = ', '.join([
             'id', 'threadId', 'labelIds', 'internalDate',
             f'payload({', '.join([
-                'partId', 'mimeType', 'filename',
+                'partId', 'mimeType', 'filename', 'body(data)',
                 f'parts({', '.join([
-                    'partId', 'mimeType', 'filename', 'body(attachmentId)',
+                    'partId', 'mimeType', 'filename', 'body(data, attachmentId)',
+                    'parts(partId, mimeType, filename, body(data))',
                 ])})',
             ])})',
         ])
@@ -168,24 +185,29 @@ class Gmail(ClientManager[Any]):
             fields=fields,
         ).execute()
 
-        labels = [Label(id=label_id) for label_id in response.get('labelIds')]
-        attachments = [
-            Attachment(
-                id=part['body']['attachmentId'],
-                message_id=response['id'],
-                filename=part['filename'],
-                mime_type=part.get('mimeType'),
-            )
-            for part in response.get('payload', {}).get('parts', {})
-            if 'attachmentId' in part.get('body', {})
-        ]
-        return Message(
+        message = Message(
             id=response['id'],
             thread_id=response.get('threadId'),
             timestamp=datetime.fromtimestamp(int(response['internalDate']) / 1000, timezone.utc),
-            labels=labels,
-            attachments=attachments,
+            labels=[Label(id=label_id) for label_id in response.get('labelIds')],
+            attachments=[],
         )
+
+        # Process message parts
+        for part in response.get('payload').get('parts', []):
+            if 'attachmentId' in part.get('body', {}):
+                message.attachments.append(  # type: ignore[union-attr]
+                    Attachment(
+                        id=part['body']['attachmentId'],
+                        message_id=response['id'],
+                        filename=part['filename'],
+                        mime_type=part.get('mimeType'),
+                    )
+                )
+            else:
+                message.add_part(part)
+
+        return message
 
     def download_attachment(  # pylint: disable=too-many-arguments
         self,

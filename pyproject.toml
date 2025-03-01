@@ -43,6 +43,7 @@ packages = ['stormware', 'stormware.amazon', 'stormware.google']
 
 [tool.stormware]
 organization = 'logikal.io'
+configuration = 'logikal-io-stormware'
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
