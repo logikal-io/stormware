@@ -25,7 +25,13 @@ def test_query() -> None:
 
 
 @mark.xfail(os.getenv('GITHUB_ACTIONS') == 'true', reason='might be an auth token scope problem')
-def test_integration(gmail: Gmail) -> None:  # pragma: no cov
+def test_integration_labels(gmail: Gmail) -> None:  # pragma: no cov
+    labels = gmail.labels()
+    assert labels
+
+
+@mark.xfail(os.getenv('GITHUB_ACTIONS') == 'true', reason='might be an auth token scope problem')
+def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cov
     messages = gmail.messages(
         query=Query(
             sender='non-existent-sender@logikal.io',
@@ -39,7 +45,7 @@ def test_integration(gmail: Gmail) -> None:  # pragma: no cov
 
 
 @mark.skip(reason="these email messages are specific to Gergely's account")
-def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
+def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
     messages = sorted(gmail.messages(
         query=Query(
             sender='payments-noreply@google.com',
@@ -85,6 +91,23 @@ def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:  # pragma: 
             dst=tmp_path,
             filename=filename,
         )
+
+
+def test_labels(mocker: MockerFixture) -> None:
+    client = mocker.patch('stormware.google.gmail.Gmail.create_client').return_value
+    client.users.return_value.labels.return_value.list.return_value.execute.return_value = {
+        'labels': [
+            {'id': 'label_1', 'name': 'Label 1'},
+            {'id': 'label_2', 'name': 'Label 2'},
+        ],
+    }
+    with Gmail() as gmail:
+        labels = sorted(gmail.labels())
+        assert labels == [
+            Label(id='label_1', name='Label 1'),
+            Label(id='label_2', name='Label 2'),
+        ]
+
 
 
 def test_messages(mocker: MockerFixture) -> None:
