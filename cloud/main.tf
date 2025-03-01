@@ -1,12 +1,4 @@
 # Services
-resource "google_project_service" "cloud_resource_manager" {
-  service = "cloudresourcemanager.googleapis.com"
-}
-
-resource "google_project_service" "service_usage" {
-  service = "serviceusage.googleapis.com"
-}
-
 resource "google_project_service" "secret_manager" {
   service = "secretmanager.googleapis.com"
 }
@@ -25,10 +17,6 @@ resource "google_project_service" "drive" {
 
 resource "google_project_service" "gmail" {
   service = "gmail.googleapis.com"
-}
-
-resource "google_project_service" "cloud_sql" {
-  service = "sqladmin.googleapis.com"
 }
 
 # GitHub Actions

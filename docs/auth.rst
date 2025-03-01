@@ -19,25 +19,30 @@ Google Cloud Platform
 ---------------------
 The default authentication mechanism (implemented in :class:`~stormware.google.auth.GCPAuth`) first
 looks for a set of credentials in the
-``$XDG_CONFIG_HOME/gcloud/credentials/{organization_id}.json`` file, where ``organization_id`` is
-derived from the provided ``organization`` value by replacing dots with dashes. If the organization
-credentials file does not exist, we use the application default credentials.
+``$XDG_CONFIG_HOME/gcloud/credentials/{configuration}.json`` file, where ``configuration`` defaults
+to the ``organization_id``, which is derived from the provided ``organization`` value by replacing
+dots with dashes. If the credentials file does not exist, we use the application default
+credentials.
 
 .. note::
 
     We recommend using the `gcpl script
     <https://github.com/logikal-io/ansible-public-playbooks/blob/main/roles/gcp/files/bin/gcpl>`_
-    for generating organization credentials. Note that you need to add the ``-s stormware`` option
-    if you are using Google connectors that are not related to the Google Cloud Platform (for
-    example, the :ref:`connectors:Google Sheets` connector).
+    for creating a credentials file. Note that you need to add the ``-s stormware`` option if you
+    are using Google connectors that are not related to the Google Cloud Platform (for example, the
+    :ref:`connectors:Google Sheets` or the :ref:`connectors:Gmail` connector). In this case you
+    should also configure your `OAuth 2.0 client credentials
+    <https://cloud.google.com/solutions/sap/docs/abap-sdk/on-premises-or-any-cloud/latest/authentication-oauth-client-credentials>`_
+    and provide the path to the client ID credentials file when invoking ``gcpl`` via the ``-i`` option.
 
-A default organization and project can be set under the ``tool.stormware`` section of a project's
-``pyproject.toml`` file as follows:
+A default configuration, organization and project can be set under the ``tool.stormware`` section
+of a project's ``pyproject.toml`` file as follows:
 
 .. code-block:: toml
 
     [tool.stormware]
     organization = 'example.com'
+    configuration = 'example-com-stormware'
     project = 'my-project'
 
 If the project is not provided, the ``project.name`` value is used from the ``pyproject.toml`` file

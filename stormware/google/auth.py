@@ -28,6 +28,23 @@ class GCPAuth(Auth):
     def clear_cache(self) -> None:
         self._credentials = {}
 
+    def configuration(
+        self,
+        configuration: str | None = None,
+        organization: str | None = None,
+    ) -> str:
+        """
+        Return the configuration name.
+
+        Defaults to the ``configuration`` value set in ``pyproject.toml`` under the
+        ``tool.stormware`` section or the organization ID.
+        """
+        return (
+            configuration
+            or tool_config('stormware').get('configuration')
+            or self.organization_id(organization)
+        )
+
     def project(self, project: str | None = None) -> str:
         """
         Return the project name.
@@ -52,37 +69,45 @@ class GCPAuth(Auth):
         """
         return f'{self.project(project=project)}-{self.organization_id(organization)}'
 
-    def organization_credentials_path(self, organization: str | None = None) -> Path | None:
+    def credentials_path(
+        self,
+        configuration: str | None = None,
+        organization: str | None = None,
+    ) -> Path | None:
         """
-        Return the path to the organization credentials or :data:`None` if it does not exist.
+        Return the path to the credentials or :data:`None` if it does not exist.
 
-        Constructed as ``$XDG_CONFIG_HOME/gcloud/credentials/{organization_id}.json``.
+        Constructed as ``$XDG_CONFIG_HOME/gcloud/credentials/{configuration}.json``.
         """
-        credentials_path = self._gcloud_config / 'credentials' / self.organization_id(organization)
+        configuration = self.configuration(configuration=configuration, organization=organization)
+        credentials_path = self._gcloud_config / 'credentials' / configuration
         credentials_path = credentials_path.with_suffix('.json')
         return credentials_path if credentials_path.exists() else None
 
     def credentials(
-        self, organization: str | None = None, project: str | None = None,
+        self,
+        configuration: str | None = None,
+        organization: str | None = None,
+        project: str | None = None,
     ) -> Credentials:
         """
-        Return the organization credentials when they exist or the application default credentials.
+        Return the configuration credentials or the application default credentials.
         """
-        organization = self.organization(organization)
+        configuration = self.configuration(configuration=configuration, organization=organization)
         project = self.project(project)
         credentials: Credentials
         logger.debug(
-            f'Loading credentials for organization "{organization}" and project "{project}"'
+            f'Loading credentials for configuration "{configuration}" and project "{project}"'
         )
 
-        if cached_credentials := self._credentials.get((organization, project)):
+        if cached_credentials := self._credentials.get((configuration, project)):
             logger.debug('Using cached credentials')
             return cached_credentials
 
-        if organization_credentials := self.organization_credentials_path(organization):
-            logger.debug(f'Loading credentials from file "{organization_credentials}"')
+        if path := self.credentials_path(configuration=configuration, organization=organization):
+            logger.debug(f'Loading credentials from file "{path}"')
             credentials = load_credentials_from_file(  # type: ignore[no-untyped-call]
-                organization_credentials,
+                path,
                 quota_project_id=self.project_id(organization=organization, project=project)
             )[0]
         else:
@@ -91,5 +116,5 @@ class GCPAuth(Auth):
             # (see https://github.com/google-github-actions/auth/issues/250)
             credentials = default()[0]  # type: ignore[no-untyped-call]
 
-        self._credentials[(organization, project)] = credentials
+        self._credentials[(configuration, project)] = credentials
         return credentials

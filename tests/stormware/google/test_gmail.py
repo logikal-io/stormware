@@ -58,6 +58,13 @@ def test_integration_advanced(gmail: Gmail, tmp_path: Path) -> None:  # pragma: 
     message = gmail.message(messages[0])
     assert message.id == '194254ea8cff4383'
     assert message.thread_id == '194254ea8cff4383'
+    assert message.subject
+    assert message.subject.startswith('Google Cloud Platform & APIs')
+    assert message.plain_text
+    assert message.html_text
+    assert message.plain_text.startswith('Google Cloud Platform & APIs')
+    assert 'Google Cloud Platform & APIs monthly invoice' in message.plain_text
+    assert 'Google Cloud Platform &amp; APIs monthly invoice' in message.html_text
     assert message.timestamp == datetime(2025, 1, 2, 4, 38, 18, tzinfo=timezone.utc)
     assert message.attachments
     assert message.attachments[0].message_id == '194254ea8cff4383'
@@ -95,22 +102,43 @@ def test_messages(mocker: MockerFixture) -> None:
 
 
 def test_message(mocker: MockerFixture) -> None:
+    plain_text = 'plain text'
+    html_text = '<h1>HTML text</h1>'
+    plain_text_data = base64.urlsafe_b64encode(plain_text.encode())
+    html_text_data = base64.urlsafe_b64encode(html_text.encode())
+
     timestamp = datetime(2025, 2, 15, 10, 45, 35, tzinfo=timezone.utc)
     client = mocker.patch('stormware.google.gmail.Gmail.create_client').return_value
     client.users.return_value.messages.return_value.get.return_value.execute.return_value = {
         'id': 'message_1',
         'threadId': 'thread_1',
         'labelIds': ['label_1', 'label_2'],
-        'payload': {'parts': [{
-            'mimeType': 'application/pdf', 'filename': 'file.pdf',
-            'body': {'attachmentId': 'attachment_1'},
-        }]},
+        'payload': {
+            'headers': [{'name': 'Subject', 'value': 'Message subject'}],
+            'parts': [
+                {
+                    'mimeType': 'application/pdf', 'filename': 'file.pdf',
+                    'body': {'attachmentId': 'attachment_1'},
+                },
+                {
+                    'mimeType': 'multipart/alternative',
+                    'parts': [
+                        {'mimeType': 'text/plain', 'body': {'data': plain_text_data}},
+                        {'mimeType': 'text/html', 'body': {'data': html_text_data}},
+                    ]
+                },
+            ],
+        },
         'internalDate': timestamp.timestamp() * 1000,
     }
     with Gmail() as gmail:
         message = gmail.message(Message(id='message_1'))
         assert message == Message(
-            id='message_1', thread_id='thread_1',
+            id='message_1',
+            thread_id='thread_1',
+            subject='Message subject',
+            plain_text=plain_text,
+            html_text=html_text,
             timestamp=timestamp,
             labels=[Label(id='label_1'), Label(id='label_2')],
             attachments=[Attachment(
