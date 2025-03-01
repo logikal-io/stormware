@@ -11,12 +11,12 @@ Authentication
 --------------
 Note that you will need to execute the following steps to be able to run the test suite locally:
 
-1. Download the ``Stormware`` OAuth client ID file from the `Cloud Console
+1. Download the ``Stormware`` OAuth 2.0 client credentials file from the `Cloud Console
    <https://console.cloud.google.com/apis/credentials>`_ in the ``Stormware`` project and save it
-   at ``~/.config/gcloud/client_id_files``
+   at ``~/.config/gcloud/client_credentials/``
 2. Authenticate using `gcpl
    <https://github.com/logikal-io/ansible-public-playbooks/blob/main/roles/gcp/files/bin/gcpl>`_ as
    follows::
 
      gcpl -c logikal-io-stormware -e <your_email>@logikal.io -p stormware-logikal-io \
-       -s stormware -i ~/.config/gcloud/client_id_files/stormware-logikal-io.json
+       -s stormware -i ~/.config/gcloud/client_credentials/stormware-logikal-io.json
