@@ -11,7 +11,7 @@ Authentication
 --------------
 Note that you will need to execute the following steps to be able to run the test suite locally:
 
-1. Download the ``Stormware`` OAuth 2.0 client credentials file from the `Cloud Console
+1. Download the ``Stormware`` OAuth 2.0 client credentials file from `Google Cloud Console
    <https://console.cloud.google.com/apis/credentials>`_ in the ``Stormware`` project and save it
    at ``~/.config/gcloud/client_credentials/``
 2. Authenticate using `gcpl
