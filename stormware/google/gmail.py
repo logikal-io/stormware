@@ -211,7 +211,7 @@ class Gmail(ClientManager[Any]):
         )
 
         # Process headers
-        for header in (headers := response.get('payload', {}).get('headers', {})):
+        for header in response.get('payload', {}).get('headers', {}):
             if header['name'].lower() == 'from':
                 message.sender = header['value']
             elif header['name'].lower() == 'to':
