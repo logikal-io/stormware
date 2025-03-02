@@ -5,6 +5,7 @@ Gmail API connector.
 # - Google API Python Client Library: https://googleapis.github.io/google-api-python-client/
 # - Gmail API: https://developers.google.com/gmail/api
 import base64
+import email
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from logging import getLogger
@@ -19,7 +20,7 @@ from stormware.google.auth import GCPAuth
 logger = getLogger(__name__)
 
 
-@dataclass(order=True)
+@dataclass(order=True, kw_only=True)
 class Label:
     """
     Represents a label.
@@ -28,7 +29,7 @@ class Label:
     name: str | None = None
 
 
-@dataclass(order=True)
+@dataclass(order=True, kw_only=True)
 class Attachment:
     """
     Represents an email message attachment.
@@ -39,16 +40,25 @@ class Attachment:
     mime_type: str | None
 
 
-@dataclass(order=True)
+@dataclass(order=True, kw_only=True)
+class Address:
+    """
+    Represents an email address.
+    """
+    email: str
+    display_name: str | None = None
+
+
+@dataclass(order=True, kw_only=True)
 class Message:  # pylint: disable=too-many-instance-attributes
     """
     Represents an email message.
     """
     id: str
     thread_id: str | None = None
-    sender: str | None = None
-    to: str | None = None
-    cc: str | None = None
+    sender: Address | None = None
+    to: list[Address] | None = None
+    cc: list[Address] | None = None
     subject: str | None = None
     plain_text: str | None = None
     html_text: str | None = None
@@ -71,7 +81,7 @@ class Message:  # pylint: disable=too-many-instance-attributes
                 self.add_part(subpart)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Query:  # pylint: disable=too-many-instance-attributes
     """
     Represents a Gmail `search query <https://support.google.com/mail/answer/7190?hl=en>`_.
@@ -180,6 +190,13 @@ class Gmail(ClientManager[Any]):
                     for message in messages
                 ]
 
+    @staticmethod
+    def _parse_address(addresses: str) -> list[Address]:
+        return [
+            Address(email=field[1], display_name=field[0] or None)
+            for field in email.utils.getaddresses([addresses])
+        ]
+
     def message(self, message: Message, *, user_id: str = 'me') -> Message:
         """
         Load a specific message.
@@ -205,6 +222,8 @@ class Gmail(ClientManager[Any]):
         message = Message(
             id=response['id'],
             thread_id=response.get('threadId'),
+            to=[],
+            cc=[],
             timestamp=datetime.fromtimestamp(int(response['internalDate']) / 1000, timezone.utc),
             labels=[Label(id=label_id) for label_id in response.get('labelIds')],
             attachments=[],
@@ -213,11 +232,11 @@ class Gmail(ClientManager[Any]):
         # Process headers
         for header in response.get('payload', {}).get('headers', []):
             if header['name'].lower() == 'from':
-                message.sender = header['value']
+                message.sender = self._parse_address(header['value'])[0]
             elif header['name'].lower() == 'to':
-                message.to = header['value']
+                message.to = self._parse_address(header['value'])
             elif header['name'].lower() == 'cc':
-                message.cc = header['value']
+                message.cc = self._parse_address(header['value'])
             elif header['name'].lower() == 'subject':
                 message.subject = header['value']
 
