@@ -19,7 +19,7 @@ from stormware.google.auth import GCPAuth
 logger = getLogger(__name__)
 
 
-@dataclass
+@dataclass(order=True)
 class Label:
     """
     Represents a label.
@@ -28,7 +28,7 @@ class Label:
     name: str | None = None
 
 
-@dataclass
+@dataclass(order=True)
 class Attachment:
     """
     Represents an email message attachment.
@@ -131,6 +131,19 @@ class Gmail(ClientManager[Any]):
     def create_client(self) -> Any:
         return build('gmail', 'v1', credentials=self.auth.credentials(), cache_discovery=False)
 
+    def labels(self, *, user_id: str = 'me') -> list[Label]:
+        """
+        Load labels.
+
+        Args:
+            user_id: The user ID to use.
+
+        """
+        response = self.client.users().labels().list(  # pylint: disable=no-member
+            userId=user_id
+        ).execute()
+        return [Label(id=label['id'], name=label['name']) for label in response.get('labels', [])]
+
     def messages(self, query: Query, *, user_id: str = 'me') -> list[Message]:
         """
         Load messages that match a given query.
@@ -149,7 +162,7 @@ class Gmail(ClientManager[Any]):
         while True:  # pylint: disable=while-used
             page += 1
             logger.debug(f'Loading page {page}')
-            response = self.client.users().messages().list(  # pylint: disable=no-member
+            response = self.client.users().messages().list(
                 q=query_str,
                 userId=user_id,
                 labelIds=[label.id for label in query.labels or []],
