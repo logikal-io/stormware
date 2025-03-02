@@ -44,7 +44,7 @@ def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cov
     assert messages == []
 
 
-@mark.skip(reason="these email messages are specific to Gergely's account")
+# @mark.skip(reason="these email messages are specific to Gergely's account")
 def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
     messages = sorted(gmail.messages(
         query=Query(
@@ -64,6 +64,11 @@ def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: n
     message = gmail.message(messages[0])
     assert message.id == '194254ea8cff4383'
     assert message.thread_id == '194254ea8cff4383'
+    assert message.sender
+    assert message.sender == 'Google Payments <payments-noreply@google.com>'
+    assert message.to
+    assert message.to == 'gergely.kalmar@logikal.io'
+    assert not message.cc
     assert message.subject
     assert message.subject.startswith('Google Cloud Platform & APIs')
     assert message.plain_text

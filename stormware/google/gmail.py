@@ -46,6 +46,9 @@ class Message:  # pylint: disable=too-many-instance-attributes
     """
     id: str
     thread_id: str | None = None
+    sender: str | None = None
+    to: str | None = None
+    cc: str | None = None
     subject: str | None = None
     plain_text: str | None = None
     html_text: str | None = None
@@ -207,9 +210,16 @@ class Gmail(ClientManager[Any]):
             attachments=[],
         )
 
-        headers = response.get('payload', {}).get('headers', {})
-        if items := [header['value'] for header in headers if header['name'].lower() == 'subject']:
-            message.subject = items[0]
+        # Process headers
+        for header in (headers := response.get('payload', {}).get('headers', {})):
+            if header['name'].lower() == 'from':
+                message.sender = header['value']
+            elif header['name'].lower() == 'to':
+                message.to = header['value']
+            elif header['name'].lower() == 'cc':
+                message.cc = header['value']
+            elif header['name'].lower() == 'subject':
+                message.subject = header['value']
 
         # Process message parts
         for part in response.get('payload', {}).get('parts', []):
