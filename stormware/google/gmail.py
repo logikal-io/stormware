@@ -139,7 +139,9 @@ class Gmail(ClientManager[Any]):
             user_id: The user ID to use.
 
         """
-        response = self.client.users().labels().list(userId=user_id).execute()
+        response = self.client.users().labels().list(  # pylint: disable=no-member
+            userId=user_id
+        ).execute()
         return [Label(id=label['id'], name=label['name']) for label in response.get('labels', [])]
 
     def messages(self, query: Query, *, user_id: str = 'me') -> list[Message]:
@@ -160,7 +162,7 @@ class Gmail(ClientManager[Any]):
         while True:  # pylint: disable=while-used
             page += 1
             logger.debug(f'Loading page {page}')
-            response = self.client.users().messages().list(  # pylint: disable=no-member
+            response = self.client.users().messages().list(
                 q=query_str,
                 userId=user_id,
                 labelIds=[label.id for label in query.labels or []],
