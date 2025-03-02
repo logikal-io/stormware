@@ -44,7 +44,7 @@ def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cov
     assert messages == []
 
 
-# @mark.skip(reason="these email messages are specific to Gergely's account")
+@mark.skip(reason="these email messages are specific to Gergely's account")
 def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
     messages = sorted(gmail.messages(
         query=Query(
