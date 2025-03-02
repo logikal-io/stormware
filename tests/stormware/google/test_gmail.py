@@ -109,7 +109,6 @@ def test_labels(mocker: MockerFixture) -> None:
         ]
 
 
-
 def test_messages(mocker: MockerFixture) -> None:
     client = mocker.patch('stormware.google.gmail.Gmail.create_client').return_value
     client.users.return_value.messages.return_value.list.return_value.execute.side_effect = [

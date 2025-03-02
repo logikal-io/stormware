@@ -139,9 +139,7 @@ class Gmail(ClientManager[Any]):
             user_id: The user ID to use.
 
         """
-        response = self.client.users().labels().list(  # pylint: disable=no-member
-            userId=user_id,
-        ).execute()
+        response = self.client.users().labels().list(userId=user_id).execute()
         return [Label(id=label['id'], name=label['name']) for label in response.get('labels', [])]
 
     def messages(self, query: Query, *, user_id: str = 'me') -> list[Message]:

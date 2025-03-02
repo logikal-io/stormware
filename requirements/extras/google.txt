@@ -1,6 +1,6 @@
 google-api-python-client==2.162.0
 google-auth==2.38.0
-google-cloud-bigquery[pandas]~=3.30
+google-cloud-bigquery[pandas]==3.29.0
 google-cloud-bigquery-storage~=2.28
 google-cloud-secret-manager==2.23.1
 google-crc32c==1.6.0
