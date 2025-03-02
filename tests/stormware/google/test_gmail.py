@@ -1,17 +1,18 @@
 import base64
 import os
+import platform
 from datetime import datetime, timezone
 from pathlib import Path
 
 from pytest import mark, raises
 from pytest_mock import MockerFixture
 
-from stormware.google.gmail import Attachment, Gmail, Label, Message, Query
+from stormware.google.gmail import Address, Attachment, Gmail, Label, Message, Query
 
 
 def test_query() -> None:
     assert 'text from:sender to:to' in str(Query(
-        'text',
+        text='text',
         sender='sender',
         to='to',
         cc='cc',
@@ -36,7 +37,7 @@ def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cov
         query=Query(
             sender='non-existent-sender@logikal.io',
             to='non-existent-to@logikal.io',
-            subject='Non-existent Subject',
+            subject='Non-Existent Subject',
             timestamp_from=datetime(2025, 1, 1, tzinfo=timezone.utc),
             timestamp_to=datetime(2025, 1, 15, tzinfo=timezone.utc),
         ),
@@ -44,7 +45,10 @@ def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cov
     assert messages == []
 
 
-@mark.skip(reason="these email messages are specific to Gergely's account")
+@mark.xfail(
+    not (os.getenv('USER') == 'gregory' and platform.node() == 'flux'),
+    reason="these email messages are specific to Gergely's account",
+)
 def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
     messages = sorted(gmail.messages(
         query=Query(
@@ -64,6 +68,11 @@ def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: n
     message = gmail.message(messages[0])
     assert message.id == '194254ea8cff4383'
     assert message.thread_id == '194254ea8cff4383'
+    assert message.sender == Address(
+        email='payments-noreply@google.com', display_name='Google Payments',
+    )
+    assert message.to == [Address(email='gergely.kalmar@logikal.io')]
+    assert not message.cc
     assert message.subject
     assert message.subject.startswith('Google Cloud Platform & APIs')
     assert message.plain_text
@@ -116,7 +125,7 @@ def test_messages(mocker: MockerFixture) -> None:
         {'messages': [{'id': 'message_2', 'threadId': 'thread_2'}]},
     ]
     with Gmail() as gmail:
-        messages = sorted(gmail.messages(query=Query('query')))
+        messages = sorted(gmail.messages(query=Query(text='query')))
         assert messages == [
             Message(id='message_1', thread_id='thread_1'),
             Message(id='message_2', thread_id='thread_2'),
@@ -136,7 +145,16 @@ def test_message(mocker: MockerFixture) -> None:
         'threadId': 'thread_1',
         'labelIds': ['label_1', 'label_2'],
         'payload': {
-            'headers': [{'name': 'Subject', 'value': 'Message subject'}],
+            'headers': [
+                {'name': 'From', 'value': '"Test From" <test-from@example.com>'},
+                {'name': 'To', 'value': ', '.join([
+                    '"Test To 1" <test-to-1@example.com>', '"Test To 2" <test-to-2@example.com>',
+                ])},
+                {'name': 'Cc', 'value': ', '.join([
+                    '"Test Cc 1" <test-cc-1@example.com>', '"Test Cc 2" <test-cc-2@example.com>',
+                ])},
+                {'name': 'Subject', 'value': 'Message subject'},
+            ],
             'parts': [
                 {
                     'mimeType': 'application/pdf', 'filename': 'file.pdf',
@@ -147,7 +165,7 @@ def test_message(mocker: MockerFixture) -> None:
                     'parts': [
                         {'mimeType': 'text/plain', 'body': {'data': plain_text_data}},
                         {'mimeType': 'text/html', 'body': {'data': html_text_data}},
-                    ]
+                    ],
                 },
             ],
         },
@@ -158,6 +176,15 @@ def test_message(mocker: MockerFixture) -> None:
         assert message == Message(
             id='message_1',
             thread_id='thread_1',
+            sender=Address(email='test-from@example.com', display_name='Test From'),
+            to=[
+                Address(email='test-to-1@example.com', display_name='Test To 1'),
+                Address(email='test-to-2@example.com', display_name='Test To 2'),
+            ],
+            cc=[
+                Address(email='test-cc-1@example.com', display_name='Test Cc 1'),
+                Address(email='test-cc-2@example.com', display_name='Test Cc 2'),
+            ],
             subject='Message subject',
             plain_text=plain_text,
             html_text=html_text,
