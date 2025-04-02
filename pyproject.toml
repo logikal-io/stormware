@@ -7,13 +7,12 @@ name = 'stormware'
 description = 'API connectors for data analysis and task automation'
 readme = 'README.rst'
 requires-python = '~= 3.12'
-license = {file = 'LICENSE.txt'}
+license = 'MIT'
 authors = [{name = 'Logikal GmbH', email = 'contact@logikal.io'}]
 keywords = ['api', 'connector']
 classifiers = [
   'Development Status :: 5 - Production/Stable',
   'Intended Audience :: Developers',
-  'License :: OSI Approved :: MIT License',
   'Operating System :: POSIX :: Linux',
   'Programming Language :: Python :: 3',
   'Programming Language :: Python :: 3.12',
@@ -61,8 +60,8 @@ filterwarnings = [
   'ignore:datetime.datetime.utcnow:DeprecationWarning',
 ]
 
-[tool.licenses.extend_allowed_packages]
-jupyter-sphinx = '.*'  # should be removed after updating to jupyter-sphinx >0.5.3
+[tool.licenses.extend_allowed_legacy_packages]
+jupyter-sphinx = 'any'  # should be removed after updating to jupyter-sphinx >0.5.3
 
 [tool.coverage.report]
 exclude_lines = [
