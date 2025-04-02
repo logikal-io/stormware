@@ -161,7 +161,7 @@ class Spreadsheet(ClientManager[Any]):
         logger.debug('Updating values')
         self.client.values().update(
             spreadsheetId=self.key, range=sheet_name,
-            body={'values': [data.columns.values.tolist()] + data.values.tolist()},
+            body={'values': [data.columns.values.tolist()] + list(data.values.tolist())},
             valueInputOption='RAW',
         ).execute()
 
