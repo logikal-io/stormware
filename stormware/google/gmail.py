@@ -141,8 +141,11 @@ class Gmail(ClientManager[Any]):
         super().__init__()
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
-    def create_client(self) -> Any:
-        return build('gmail', 'v1', credentials=self.auth.credentials(), cache_discovery=False)
+    def create_client(self) -> Any:  # pragma: no cover
+        return build(
+            'gmail', 'v1',
+            credentials=self.auth.credentials(), cache_discovery=False,
+        )
 
     def labels(self, *, user_id: str = 'me') -> list[Label]:
         """
@@ -175,7 +178,7 @@ class Gmail(ClientManager[Any]):
         while True:  # pylint: disable=while-used
             page += 1
             logger.debug(f'Loading page {page}')
-            response = self.client.users().messages().list(
+            response = self.client.users().messages().list(  # pylint: disable=no-member
                 q=query_str,
                 userId=user_id,
                 labelIds=[label.id for label in query.labels or []],
@@ -212,7 +215,7 @@ class Gmail(ClientManager[Any]):
                 ])})',
             ])})',
         ])
-        response = self.client.users().messages().get(
+        response = self.client.users().messages().get(  # pylint: disable=no-member
             userId=user_id,
             id=message.id,
             format='full',
@@ -291,7 +294,7 @@ class Gmail(ClientManager[Any]):
             f'to "{dst_path}"'
         )
         logger.debug(f'Attachment ID: {attachment.id}')
-        response = self.client.users().messages().attachments().get(
+        response = self.client.users().messages().attachments().get(  # pylint: disable=no-member
             userId=user_id,
             messageId=attachment.message_id,
             id=attachment.id,

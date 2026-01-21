@@ -23,6 +23,6 @@ def drive() -> Iterator[Drive]:
 
 
 @fixture
-def gmail() -> Iterator[Gmail]:
+def gmail() -> Iterator[Gmail]:  # pragma: no cover
     with Gmail() as gmail_obj:
         yield gmail_obj

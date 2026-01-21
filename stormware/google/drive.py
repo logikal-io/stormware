@@ -239,7 +239,7 @@ class Drive(ClientManager[Any]):
     def _remove_file(self, file_id: str, use_trash: bool = True) -> None:
         if use_trash:
             logger.debug(f'Moving file "{file_id}" to trash')
-            self.client.files().update(
+            self.client.files().update(  # pylint: disable=no-member
                 fileId=file_id, body={'trashed': True}, supportsAllDrives=True,
             ).execute()
         else:

@@ -42,29 +42,14 @@ packages = ['stormware', 'stormware.amazon', 'stormware.google']
 
 [tool.stormware]
 organization = 'logikal.io'
-configuration = 'logikal-io-stormware'
+service_account = 'testing@stormware-logikal-io.iam.gserviceaccount.com'
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
 module = [
   'facebook_business.*',
-  'google_crc32c',
   'googleapiclient.*',
 ]
 
 [tool.pytest.ini_options]
 norecursedirs = ['build', 'docs/jupyter_execute']
-filterwarnings = [
-  'error',
-  # See https://github.com/boto/boto3/issues/3889
-  'ignore:datetime.datetime.utcnow:DeprecationWarning',
-]
-
-[tool.licenses.extend_allowed_legacy_packages]
-jupyter-sphinx = 'any'  # should be removed after updating to jupyter-sphinx >0.5.3
-
-[tool.coverage.report]
-exclude_lines = [
-  'pragma: no cov',
-  '\.\.\.',  # exclude abstract methods
-]
