@@ -2,10 +2,12 @@
 Google Cloud Platform authentication.
 """
 # Documentation: https://google-auth.readthedocs.io/
+import json
 from logging import getLogger
 from pathlib import Path
 
-from google.auth import default, load_credentials_from_file
+from google import oauth2
+from google.auth import default
 from google.auth.credentials import Credentials
 from logikal_utils.project import PYPROJECT, tool_config
 from xdg_base_dirs import xdg_config_home
@@ -106,15 +108,15 @@ class GCPAuth(Auth):
 
         if path := self.credentials_path(configuration=configuration, organization=organization):
             logger.debug(f'Loading credentials from file "{path}"')
-            credentials = load_credentials_from_file(  # type: ignore[no-untyped-call]
-                path,
-                quota_project_id=self.project_id(organization=organization, project=project)
-            )[0]
+            info = json.loads(path.read_text())
+            credentials = oauth2.credentials.Credentials.from_authorized_user_info(info=info)
         else:
             logger.debug('Loading default credentials')
-            # Note: we cannot specify the quota project ID here for some weird reason
-            # (see https://github.com/google-github-actions/auth/issues/250)
             credentials = default()[0]  # type: ignore[no-untyped-call]
+
+        credentials = credentials.with_quota_project(
+            self.project_id(organization=organization, project=project)
+        )
 
         self._credentials[(configuration, project)] = credentials
         return credentials
