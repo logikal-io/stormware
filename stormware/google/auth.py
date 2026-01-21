@@ -109,14 +109,13 @@ class GCPAuth(Auth):
         if path := self.credentials_path(configuration=configuration, organization=organization):
             logger.debug(f'Loading credentials from file "{path}"')
             info = json.loads(path.read_text())
-            credentials = oauth2.credentials.Credentials.from_authorized_user_info(info=info)
+            credentials = (
+                oauth2.credentials.Credentials.from_authorized_user_info(info=info)
+                .with_quota_project(self.project_id(organization=organization, project=project))
+            )
         else:
             logger.debug('Loading default credentials')
             credentials = default()[0]  # type: ignore[no-untyped-call]
-
-        credentials = credentials.with_quota_project(
-            self.project_id(organization=organization, project=project)
-        )
 
         self._credentials[(configuration, project)] = credentials
         return credentials
