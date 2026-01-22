@@ -26,13 +26,16 @@ def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
     file = AnonymousCredentials()  # type: ignore[no-untyped-call]
     default = AnonymousCredentials()  # type: ignore[no-untyped-call]
 
-    mocker.patch('stormware.google.auth.tool_config', return_value={})
+    mocker.patch('stormware.google.auth.tool_config', return_value={
+        'service_account': 'test_service_account',
+    })
     mocker.patch('stormware.google.auth.xdg_config_home', return_value=tmp_path)
     credentials_path = tmp_path / 'gcloud/credentials/example-org.json'
     credentials_path.parent.mkdir(parents=True, exist_ok=True)
-    credentials_path.touch()
+    credentials_path.write_text('{}')
 
-    mocker.patch('stormware.google.auth.load_credentials_from_file', return_value=[file, None])
+    mocker.patch('stormware.google.auth.OAuth2Credentials.from_authorized_user_info')
+    mocker.patch('stormware.google.auth.impersonated_credentials.Credentials', return_value=file)
     mocker.patch('stormware.google.auth.default', return_value=[default, None])
     auth = GCPAuth()
 
@@ -42,9 +45,6 @@ def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
     # Organization credentials (from cache)
     assert auth.credentials(organization='example.org') == file
 
-    # Configuration credentials (also from cache)
-    assert auth.credentials(configuration='example-org') == file
-
     # Default credentials
     auth.clear_cache()
-    assert auth.credentials(configuration='non-existent') == default
+    assert auth.credentials(organization='non-existent') == default

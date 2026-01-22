@@ -21,7 +21,7 @@ resource "google_project_service" "gmail" {
 
 # GitHub Actions
 module "gcp_github_auth" {
-  source = "github.com/logikal-io/terraform-modules//gcp/github-auth?ref=v1.15.0"
+  source = "github.com/logikal-io/terraform-modules//gcp/github-auth"
 
   github_organization = var.organization_id
   service_account_accesses = {
@@ -30,7 +30,7 @@ module "gcp_github_auth" {
 }
 
 module "aws_github_auth" {
-  source = "github.com/logikal-io/terraform-modules//aws/github-auth?ref=v1.15.0"
+  source = "github.com/logikal-io/terraform-modules//aws/github-auth"
 
   project_id = var.project_id
   role_accesses = {
@@ -74,7 +74,7 @@ resource "google_bigquery_dataset" "test" {
 locals {
   service_accounts = toset([
     module.gcp_github_auth.service_account_emails["testing"],
-    "docs-uploader@docs-logikal-io.iam.gserviceaccount.com",
+    "docs-publisher@docs-logikal-io.iam.gserviceaccount.com",
   ])
 }
 
@@ -133,4 +133,16 @@ resource "aws_iam_policy" "test_secret_access" {
 resource "aws_iam_role_policy_attachment" "test_secret_access" {
   role = module.aws_github_auth.iam_role_names["testing"]
   policy_arn = aws_iam_policy.test_secret_access.arn
+}
+
+resource "google_service_account_iam_member" "test_service_user_access" {
+  service_account_id = module.gcp_github_auth.service_accounts["testing"].id
+  role = "roles/iam.serviceAccountTokenCreator"
+  member = "group:software-engineers@logikal.io"
+}
+
+resource "google_project_iam_member" "test_project_access" {
+  project = var.project_id
+  role = "roles/serviceusage.serviceUsageConsumer"
+  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
 }

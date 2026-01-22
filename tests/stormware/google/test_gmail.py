@@ -1,6 +1,4 @@
 import base64
-import os
-import platform
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -25,14 +23,14 @@ def test_query() -> None:
     ))
 
 
-@mark.xfail(os.getenv('GITHUB_ACTIONS') == 'true', reason='might be an auth token scope problem')
-def test_integration_labels(gmail: Gmail) -> None:  # pragma: no cov
+@mark.skip(reason='Integration tests are not authorized at the moment')
+def test_integration_labels(gmail: Gmail) -> None:  # pragma: no cover
     labels = gmail.labels()
     assert labels
 
 
-@mark.xfail(os.getenv('GITHUB_ACTIONS') == 'true', reason='might be an auth token scope problem')
-def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cov
+@mark.skip(reason='Integration tests are not authorized at the moment')
+def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cover
     messages = gmail.messages(
         query=Query(
             sender='non-existent-sender@logikal.io',
@@ -45,11 +43,8 @@ def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cov
     assert messages == []
 
 
-@mark.xfail(
-    not (os.getenv('USER') == 'gregory' and platform.node() == 'flux'),
-    reason="these email messages are specific to Gergely's account",
-)
-def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cov
+@mark.skip(reason='Integration tests are not authorized at the moment')
+def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cover
     messages = sorted(gmail.messages(
         query=Query(
             sender='payments-noreply@google.com',

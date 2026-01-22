@@ -112,13 +112,13 @@ class FacebookAds:
                     filter_value=action_type,
                 ))
 
-        return data.convert_dtypes()  # type: ignore[no-any-return]
+        return data.convert_dtypes()
 
     @staticmethod
     def _get_values(
-        column: pd.Series,  # type: ignore[type-arg]
+        column: pd.Series,
         value_field: str, filter_field: str, filter_value: Any, default_value: int = 0,
-    ) -> pd.Series:  # type: ignore[type-arg]
+    ) -> pd.Series:
         return column.apply(
             lambda values: next((
                 value.get(value_field, default_value)
