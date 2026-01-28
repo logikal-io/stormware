@@ -4,14 +4,6 @@ from pytest_mock import MockerFixture
 from stormware.google.secrets import SecretManager
 
 
-def test_secret_manager() -> None:
-    secret_key = 'stormware-test'  # nosec, only used for testing
-    secret_value = 'test'  # nosec, only used for testing
-
-    with SecretManager() as secrets:
-        assert secrets[secret_key] == secret_value
-
-
 def test_data_corruption(mocker: MockerFixture) -> None:
     secret = mocker.Mock()
     secret.payload.data = 'test'

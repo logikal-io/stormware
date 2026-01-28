@@ -141,11 +141,11 @@ class Gmail(ClientManager[Any]):
         super().__init__()
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
-    def create_client(self) -> Any:  # pragma: no cover
-        return build(
-            'gmail', 'v1',
-            credentials=self.auth.credentials(), cache_discovery=False,
-        )
+    def create_client(self) -> Any:
+        credentials = self.auth.credentials(scopes=[
+            'https://www.googleapis.com/auth/gmail.readonly',
+        ])
+        return build('gmail', 'v1', credentials=credentials, cache_discovery=False)
 
     def labels(self, *, user_id: str = 'me') -> list[Label]:
         """
