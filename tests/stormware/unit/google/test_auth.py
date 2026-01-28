@@ -112,6 +112,9 @@ def test_scoped_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch('stormware.google.auth.id_token.verify_oauth2_token', return_value={
         'email': 'test.user@logikal.io',
     })
-    auth = GCPAuth(user_email='non-matching@logikal.io', ignore_cached_oauth_credentials=True)
+    auth = GCPAuth(
+        oauth_user_email='non-matching@logikal.io',
+        ignore_cached_oauth_credentials=True,
+    )
     with raises(RuntimeError, match='Invalid email address'):
         auth.credentials(organization='example.org', scopes=['scope'])

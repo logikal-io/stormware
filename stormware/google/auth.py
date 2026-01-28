@@ -41,7 +41,7 @@ class GCPAuth(Auth):
         self,
         organization: str | None = None,
         project: str | None = None,
-        user_email: str | None = None,
+        oauth_user_email: str | None = None,
         ignore_cached_oauth_credentials: bool = False,
     ):
         """
@@ -50,8 +50,8 @@ class GCPAuth(Auth):
         Args:
             organization: The organization name to use.
             project: The project name to use.
-            user_email: Make sure that the obtained credentials belong to the given user when using
-                the OAuth 2.0 flow.
+            oauth_user_email: Make sure that the obtained credentials belong to the given user when
+                using the OAuth 2.0 flow.
             ignore_cached_oauth_credentials: Whether to ignore existing cached OAuth 2.0
                 credentials (effectively forcing the user to re-authenticate, unless appropriately
                 scoped organization or application default credentials exist).
@@ -60,7 +60,7 @@ class GCPAuth(Auth):
         super().__init__(organization=organization)
         self._config = tool_config('stormware').get('google', {})
         self._project = project
-        self._user_email = user_email
+        self._oauth_user_email = oauth_user_email
         self._ignore_cached_oauth_credentials = ignore_cached_oauth_credentials
         self._local_config = xdg_config_home() / 'stormware/google'
         self._gcloud_config = xdg_config_home() / 'gcloud'
@@ -130,7 +130,7 @@ class GCPAuth(Auth):
         return None
 
     def _all_scopes(self, scopes: Iterable[str] | None) -> Iterable[str] | None:
-        if self._user_email:
+        if self._oauth_user_email:
             return list(unique([
                 'openid',
                 'https://www.googleapis.com/auth/userinfo.email',
@@ -188,15 +188,15 @@ class GCPAuth(Auth):
             )
 
             # Check user email if provided
-            if self._user_email:
+            if self._oauth_user_email:
                 claims = id_token.verify_oauth2_token(  # type: ignore[no-untyped-call]
                     id_token=credentials.id_token,
                     request=Request(),
                     audience=credentials.client_id,
                 )
-                if claims['email'] != self._user_email:
+                if claims['email'] != self._oauth_user_email:
                     raise RuntimeError(
-                        f'Invalid email address (expected "{self._user_email}", '
+                        f'Invalid email address (expected "{self._oauth_user_email}", '
                         f'got "{claims['email']}")'
                     )
 

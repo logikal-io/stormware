@@ -25,5 +25,5 @@ def drive() -> Iterator[Drive]:
 
 @fixture
 def gmail() -> Iterator[Gmail]:
-    with Gmail(auth=GCPAuth(user_email='test.user@logikal.io')) as gmail_obj:
+    with Gmail(auth=GCPAuth(oauth_user_email='test.user@logikal.io')) as gmail_obj:
         yield gmail_obj
