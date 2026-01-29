@@ -2,6 +2,7 @@ from collections.abc import Iterator
 
 from pytest import fixture
 
+from stormware.google.auth import GCPAuth
 from stormware.google.drive import Drive
 from stormware.google.gmail import Gmail
 from stormware.google.sheets import Spreadsheet
@@ -23,6 +24,6 @@ def drive() -> Iterator[Drive]:
 
 
 @fixture
-def gmail() -> Iterator[Gmail]:  # pragma: no cover
-    with Gmail() as gmail_obj:
+def gmail() -> Iterator[Gmail]:
+    with Gmail(auth=GCPAuth(oauth_user_email='test.user@logikal.io')) as gmail_obj:
         yield gmail_obj

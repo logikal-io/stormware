@@ -42,6 +42,8 @@ packages = ['stormware', 'stormware.amazon', 'stormware.google']
 
 [tool.stormware]
 organization = 'logikal.io'
+
+[tool.stormware.google]
 service_account = 'testing@stormware-logikal-io.iam.gserviceaccount.com'
 
 [[tool.mypy.overrides]]
@@ -49,7 +51,15 @@ ignore_missing_imports = true
 module = [
   'facebook_business.*',
   'googleapiclient.*',
+  'google_auth_oauthlib',
 ]
 
-[tool.pytest.ini_options]
+[tool.pytest]
+addopts = ['-m', 'not integration']
+markers = ['integration']
 norecursedirs = ['build', 'docs/jupyter_execute']
+filterwarnings = [
+  'error',
+  # See https://github.com/googleapis/google-auth-library-python-oauthlib/issues/442
+  'ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning',
+]

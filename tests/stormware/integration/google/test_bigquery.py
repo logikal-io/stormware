@@ -1,7 +1,7 @@
 from pandas.testing import assert_frame_equal
 
 from stormware.google.bigquery import BigQuery
-from tests.stormware.data.dataframes import TEST_DATA
+from tests.stormware.integration.data.dataframes import TEST_DATA
 
 
 def test_set_get() -> None:

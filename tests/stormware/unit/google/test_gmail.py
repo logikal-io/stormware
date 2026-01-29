@@ -2,7 +2,7 @@ import base64
 from datetime import datetime, timezone
 from pathlib import Path
 
-from pytest import mark, raises
+from pytest import raises
 from pytest_mock import MockerFixture
 
 from stormware.google.gmail import Address, Attachment, Gmail, Label, Message, Query
@@ -21,80 +21,6 @@ def test_query() -> None:
         labels=[Label(id='test_label')],
         attachment=True,
     ))
-
-
-@mark.skip(reason='Integration tests are not authorized at the moment')
-def test_integration_labels(gmail: Gmail) -> None:  # pragma: no cover
-    labels = gmail.labels()
-    assert labels
-
-
-@mark.skip(reason='Integration tests are not authorized at the moment')
-def test_integration_messages(gmail: Gmail) -> None:  # pragma: no cover
-    messages = gmail.messages(
-        query=Query(
-            sender='non-existent-sender@logikal.io',
-            to='non-existent-to@logikal.io',
-            subject='Non-Existent Subject',
-            timestamp_from=datetime(2025, 1, 1, tzinfo=timezone.utc),
-            timestamp_to=datetime(2025, 1, 15, tzinfo=timezone.utc),
-        ),
-    )
-    assert messages == []
-
-
-@mark.skip(reason='Integration tests are not authorized at the moment')
-def test_integration_message(gmail: Gmail, tmp_path: Path) -> None:  # pragma: no cover
-    messages = sorted(gmail.messages(
-        query=Query(
-            sender='payments-noreply@google.com',
-            subject='Google Cloud Platform & APIs: Your invoice is available',
-            timestamp_from=datetime(2025, 1, 1, tzinfo=timezone.utc),
-            timestamp_to=datetime(2025, 3, 1, tzinfo=timezone.utc),
-            attachment=True,
-            labels=[Label(id='CATEGORY_UPDATES')],
-        ),
-    ))
-    assert messages == [
-        Message(id='194254ea8cff4383', thread_id='194254ea8cff4383'),
-        Message(id='194c40cae1b67443', thread_id='194c40cae1b67443'),
-    ]
-
-    message = gmail.message(messages[0])
-    assert message.id == '194254ea8cff4383'
-    assert message.thread_id == '194254ea8cff4383'
-    assert message.sender == Address(
-        email='payments-noreply@google.com', display_name='Google Payments',
-    )
-    assert message.to == [Address(email='gergely.kalmar@logikal.io')]
-    assert not message.cc
-    assert message.subject
-    assert message.subject.startswith('Google Cloud Platform & APIs')
-    assert message.plain_text
-    assert message.html_text
-    assert message.plain_text.startswith('Google Cloud Platform & APIs')
-    assert 'Google Cloud Platform & APIs monthly invoice' in message.plain_text
-    assert 'Google Cloud Platform &amp; APIs monthly invoice' in message.html_text
-    assert message.timestamp == datetime(2025, 1, 2, 4, 38, 18, tzinfo=timezone.utc)
-    assert message.attachments
-    assert message.attachments[0].message_id == '194254ea8cff4383'
-    assert message.attachments[0].mime_type == 'application/pdf'
-
-    filename = f'invoice_google_cloud_{message.timestamp.strftime('%Y%m%d')}.pdf'
-    attachment = gmail.download_attachment(
-        attachment=message.attachments[0],
-        dst=tmp_path,
-        filename=filename,
-    )
-    assert attachment.exists()
-
-    # Try downloading again
-    with raises(FileExistsError):
-        gmail.download_attachment(
-            attachment=message.attachments[0],
-            dst=tmp_path,
-            filename=filename,
-        )
 
 
 def test_labels(mocker: MockerFixture) -> None:

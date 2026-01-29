@@ -57,6 +57,24 @@ resource "google_secret_manager_secret" "facebook" {
   depends_on = [google_project_service.secret_manager]
 }
 
+resource "google_secret_manager_secret" "google_oauth_client_secrets" {
+  secret_id = "stormware-google-oauth-client-secrets"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secret_manager]
+}
+
+resource "google_secret_manager_secret" "google_oauth_credentials" {
+  secret_id = "stormware-google-oauth-credentials"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secret_manager]
+}
+
 resource "aws_secretsmanager_secret" "test" {
   name = "stormware-test"
   recovery_window_in_days = 0
@@ -78,9 +96,15 @@ locals {
   ])
 }
 
-resource "google_secret_manager_secret_iam_member" "test_accessor" {
+resource "google_secret_manager_secret_iam_member" "test_setter" {
+  for_each = toset([
+    "roles/secretmanager.viewer",
+    "roles/secretmanager.secretAccessor",
+    "roles/secretmanager.secretVersionManager",
+  ])
+
   secret_id = google_secret_manager_secret.test.id
-  role = "roles/secretmanager.secretAccessor"
+  role = each.key
   member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
 }
 
@@ -90,6 +114,24 @@ resource "google_secret_manager_secret_iam_member" "facebook_accessor" {
   secret_id = google_secret_manager_secret.facebook.id
   role = "roles/secretmanager.secretAccessor"
   member = "serviceAccount:${each.key}"
+}
+
+resource "google_secret_manager_secret_iam_member" "google_oauth_client_secrets_accessor" {
+  secret_id = google_secret_manager_secret.google_oauth_client_secrets.id
+  role = "roles/secretmanager.secretAccessor"
+  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
+}
+
+resource "google_secret_manager_secret_iam_member" "google_oauth_credentials_setter" {
+  for_each = toset([
+    "roles/secretmanager.viewer",
+    "roles/secretmanager.secretAccessor",
+    "roles/secretmanager.secretVersionManager",
+  ])
+
+  secret_id = google_secret_manager_secret.google_oauth_credentials.id
+  role = each.key
+  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
 }
 
 resource "google_project_iam_member" "bigquery_job_user" {
