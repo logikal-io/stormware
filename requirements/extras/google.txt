@@ -1,5 +1,5 @@
 google-api-python-client==2.188.0
-google-auth==2.47.0
+google-auth==2.48.0
 google-auth-oauthlib==1.2.4
 google-cloud-bigquery[pandas]==3.40.0
 google-cloud-bigquery-storage~=2.36
