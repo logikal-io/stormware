@@ -7,12 +7,11 @@ jobs:
     uses: logikal-io/github-workflows/.github/workflows/python-run-tests.yml@v12
     with:
       pytest-args: -m "integration or not integration"
-      aws-testing-role: arn:aws:iam::979401941518:role/testing-stormware-logikal-io
-      aws-testing-region: eu-central-2
-      gcp-testing-workload-identity-provider: "projects/535697707941/locations/global/\
-                                               workloadIdentityPools/ci-cd/providers/\
-                                               github-actions"
-      gcp-testing-service-account: testing@stormware-logikal-io.iam.gserviceaccount.com
+      aws-role: arn:aws:iam::979401941518:role/testing-stormware-logikal-io
+      aws-region: eu-central-2
+      gcp-workload-identity-provider: "projects/535697707941/locations/global/\
+                                       workloadIdentityPools/ci-cd/providers/github-actions"
+      gcp-service-account-email: testing@stormware-logikal-io.iam.gserviceaccount.com
     permissions:
       contents: read
       id-token: write
