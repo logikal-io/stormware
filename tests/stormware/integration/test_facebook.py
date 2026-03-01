@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas
 from pandas.testing import assert_frame_equal
-from pytest import mark, raises
+from pytest import raises
 
 from stormware.facebook import FacebookAds
 

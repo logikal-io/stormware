@@ -12,6 +12,6 @@ def test_set_get() -> None:
         assert_frame_equal(table_data.astype({
             'integer': 'int64',
             'date': 'object',
-            'datetime': 'datetime64[ns]',
-            'datetime_micro': 'datetime64[ns]',
+            'datetime': 'datetime64[us]',
+            'datetime_micro': 'datetime64[us]',
         }), TEST_DATA)
