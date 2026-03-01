@@ -1,19 +1,23 @@
 [
   {
-    "actions": [
-      {"action_type": "link_click", "value": "1"},
-      {"action_type": "page_engagement", "value": "1"},
-      {"action_type": "post_engagement", "value": "1"}
-    ],
+    "campaign_name": "(y_2026)(p_mindlab)(g_discover)(o_traffic)(c_CHE)",
     "ad_name": "(s_data_science)",
-    "campaign_name": "(y_2023)(p_mindlab)(g_discover)(o_traffic)(c_USA)",
+    "spend": 5.94,
+    "impressions": 160,
     "clicks": 1,
-    "date_start": "2023-01-07",
-    "date_stop": "2023-01-07",
-    "impressions": 115,
-    "spend": 3.31,
-    "actions:link_click": 1,
+    "actions": [
+      {"action_type": "onsite_conversion.post_net_like", "value": "1"},
+      {"action_type": "page_engagement", "value": "1"},
+      {"action_type": "post_engagement", "value": "1"},
+      {"action_type": "post_interaction_gross", "value": "1"},
+      {"action_type": "post_reaction", "value": "1"}
+    ],
+    "date_start": "2026-02-28",
+    "date_stop": "2026-02-28",
+    "actions:onsite_conversion.post_net_like": 1,
     "actions:page_engagement": 1,
-    "actions:post_engagement": 1
+    "actions:post_engagement": 1,
+    "actions:post_interaction_gross": 1,
+    "actions:post_reaction": 1
   }
 ]

@@ -95,6 +95,8 @@ class FacebookAds:
         account = AdAccount(account_id, api=self.api)
         data = account.get_insights(fields=dimensions + metrics + statistics, params=parameters)
         data = pd.DataFrame(data=data)
+        if data.empty:  # no further processing is needed
+            return data
 
         for column in metrics:
             data[column] = pd.to_numeric(data[column])

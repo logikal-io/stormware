@@ -133,7 +133,7 @@ class Spreadsheet(ClientManager[Any]):
                 data[column] = data[column].apply(
                     lambda value: value.strftime('%Y-%m-%d')
                 ) if isinstance(first_value, date) else data[column]
-            elif types.is_datetime64_ns_dtype(data_type):
+            elif types.is_datetime64_any_dtype(data_type):
                 no_microseconds = (
                     (data[column].dt.microsecond == 0)  # pylint: disable=compare-to-zero
                     | (data[column].isnull())

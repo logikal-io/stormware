@@ -47,7 +47,7 @@ the Facebook Ads connector:
         dimensions=['campaign_name'],
         parameters={
             'level': 'campaign',
-            'time_range': {'since': '2023-01-01', 'until': '2023-01-07'},
+            'time_range': {'since': '2026-02-25', 'until': '2026-03-01'},
         },
     )[['campaign_name', 'spend', 'impressions', 'clicks']]
 
