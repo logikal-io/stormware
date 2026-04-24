@@ -272,6 +272,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         else:
             logger.debug('Loading default credentials')
             credentials = default()[0]
+            return credentials  # default credentials don't have scopes, so we return
 
         # Check credential scopes
         if missing_scopes := [
