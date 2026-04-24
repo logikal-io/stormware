@@ -21,26 +21,33 @@ from logikal_utils.project import PYPROJECT, tool_config
 from xdg_base_dirs import xdg_config_home
 
 from stormware.auth import Auth
+from stormware.google.connector import Connector
 
 logger = getLogger(__name__)
 
 
-class GCPAuth(Auth):
+class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
+    SCOPES: list[str] = []
+
     DEFAULT_OAUTH_CREDENTIALS_KEY = 'stormware-google-oauth-credentials'
     DEFAULT_OAUTH_CLIENT_SECRETS_KEY = 'stormware-google-oauth-client-secrets'
-    SCOPES = (
-        'openid',
-        'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/cloud-platform',
-        'https://www.googleapis.com/auth/spreadsheets',
-        'https://www.googleapis.com/auth/drive',
-        'https://www.googleapis.com/auth/gmail.readonly',
-    )
+    OAUTH_USER_EMAIL_SCOPES = ('openid', 'https://www.googleapis.com/auth/userinfo.email')
 
-    def __init__(
+    @staticmethod
+    def register(*connectors: type[Connector]) -> None:
+        """
+        Register connector authentication scopes.
+        """
+        for connector in connectors:
+            GCPAuth.SCOPES = list(unique([*GCPAuth.SCOPES, *connector.SCOPES]))
+
+    def __init__(  # pylint: disable=too-many-arguments
         self,
+        *,
         organization: str | None = None,
         project: str | None = None,
+        scopes: Iterable[str] | None = None,
+        oauth_flow: bool = True,
         oauth_user_email: str | None = None,
         ignore_cached_oauth_credentials: bool = False,
     ):
@@ -50,8 +57,13 @@ class GCPAuth(Auth):
         Args:
             organization: The organization name to use.
             project: The project name to use.
-            oauth_user_email: Make sure that the obtained credentials belong to the given user when
-                using the OAuth 2.0 flow.
+            scopes: The auth scopes to use. Defaults to using the registered scopes, or, if no
+                scopes are registered, then the ``auth_scopes`` value set in ``pyproject.toml``
+                under the ``tool.stormware.google`` section, or, if no such value is set, then to
+                all connector scopes.
+            oauth_flow: Whether to allow triggering the OAuth 2.0 flow.
+            oauth_user_email: Make sure that the obtained credentials match the provided user email
+                when using the OAuth 2.0 flow.
             ignore_cached_oauth_credentials: Whether to ignore existing cached OAuth 2.0
                 credentials (effectively forcing the user to re-authenticate, unless appropriately
                 scoped organization or application default credentials exist).
@@ -59,12 +71,19 @@ class GCPAuth(Auth):
         """
         super().__init__(organization=organization)
         self._config = tool_config('stormware').get('google', {})
+        self._scopes = scopes if scopes is not None else self._default_scopes()
         self._project = project
+        self._oauth_flow = oauth_flow
         self._oauth_user_email = oauth_user_email
         self._ignore_cached_oauth_credentials = ignore_cached_oauth_credentials
         self._local_config = xdg_config_home() / 'stormware/google'
         self._gcloud_config = xdg_config_home() / 'gcloud'
         self._credentials: dict[tuple[str, str, tuple[str, ...]], Credentials] = {}
+        if self._oauth_user_email:
+            self._scopes = unique([*self.OAUTH_USER_EMAIL_SCOPES, *self._scopes])
+
+    def _default_scopes(self) -> list[str]:
+        return self.SCOPES or self._config.get('auth_scopes', []) or Connector.all_scopes()
 
     def clear_cache(self) -> None:
         self._credentials = {}
@@ -129,16 +148,28 @@ class GCPAuth(Auth):
         logger.debug('No cached credentials found')
         return None
 
-    def _all_scopes(self, scopes: Iterable[str] | None) -> Iterable[str] | None:
-        if self._oauth_user_email:
-            return list(unique([
-                'openid',
-                'https://www.googleapis.com/auth/userinfo.email',
-                *(scopes or []),
-            ]))
-        return scopes
+    def _all_scopes(self, scopes: Iterable[str] | None) -> list[str]:
+        for scope in (scopes or []):
+            if scope not in self._scopes:
+                raise RuntimeError(f'Auth scope "{scope}" has not been registered')
+        return list(unique(self._scopes))
 
-    def _get_scoped_credentials(  # pylint: disable=too-many-arguments
+    def _check_oauth_user_email(self, credentials: OAuth2Credentials) -> None:
+        if not self._oauth_user_email:
+            return
+
+        claims = id_token.verify_oauth2_token(  # type: ignore[no-untyped-call]
+            id_token=credentials.id_token,
+            request=Request(),
+            audience=credentials.client_id,
+        )
+        if claims['email'] != self._oauth_user_email:
+            raise RuntimeError(
+                f'Invalid email address (expected "{self._oauth_user_email}", '
+                f'got "{claims['email']}")'
+            )
+
+    def _get_scoped_oauth_credentials(  # pylint: disable=too-many-arguments
         self,
         *,
         organization: str | None = None,
@@ -152,7 +183,11 @@ class GCPAuth(Auth):
         )
 
         logger.debug('Checking cached OAuth 2.0 credentials')
-        with SecretManager(organization=organization, project=project) as secrets:
+        auth = GCPAuth(
+            organization=organization, project=project,
+            scopes=SecretManager.SCOPES, oauth_flow=False,
+        )
+        with SecretManager(auth=auth) as secrets:
             oauth_credentials_key = oauth_credentials_key or self._config.get(
                 'oauth_credentials_key',
                 GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY,
@@ -182,23 +217,13 @@ class GCPAuth(Auth):
 
             logger.debug('Initiating OAuth 2.0 flow')
             credentials: OAuth2Credentials = get_user_credentials(
-                scopes=self._all_scopes(scopes),
+                scopes=scopes,
                 client_id=client_secrets['client_id'],
                 client_secret=client_secrets['client_secret'],
             )
 
             # Check user email if provided
-            if self._oauth_user_email:
-                claims = id_token.verify_oauth2_token(  # type: ignore[no-untyped-call]
-                    id_token=credentials.id_token,
-                    request=Request(),
-                    audience=credentials.client_id,
-                )
-                if claims['email'] != self._oauth_user_email:
-                    raise RuntimeError(
-                        f'Invalid email address (expected "{self._oauth_user_email}", '
-                        f'got "{claims['email']}")'
-                    )
+            self._check_oauth_user_email(credentials=credentials)
 
             # Cache credentials
             credentials_string = credentials.to_json()  # type: ignore[no-untyped-call]
@@ -214,12 +239,65 @@ class GCPAuth(Auth):
 
             return credentials
 
+    def _get_credentials(  # pylint: disable=too-many-arguments
+        self,
+        *,
+        organization: str | None = None,
+        project: str | None = None,
+        scopes: Iterable[str],
+        oauth_credentials_key: str | None,
+        oauth_client_secrets_key: str | None,
+    ) -> Credentials:
+        if path := self.credentials_path(organization=organization):
+            project_id = self.project_id(organization=organization, project=project)
+            logger.debug(f'Loading credentials from file "{path}"')
+            info = json.loads(path.read_text())
+            credentials = (
+                OAuth2Credentials
+                .from_authorized_user_info(info=info)  # type: ignore[no-untyped-call]
+                .with_quota_project(project_id)
+            )
+            if not self._oauth_user_email:
+                if service_account := self._config.get('service_account'):
+                    logger.debug(f'Impersonating "{service_account}"')
+                    credentials = (
+                        impersonated_credentials.Credentials(  # type: ignore[no-untyped-call]
+                            source_credentials=credentials,
+                            target_principal=service_account,
+                            target_scopes=scopes,
+                            quota_project_id=project_id,
+                        )
+                    )
+                    return credentials  # impersonated credentials don't have scopes, so we return
+        else:
+            logger.debug('Loading default credentials')
+            credentials = default()[0]
+
+        # Check credential scopes
+        if missing_scopes := [
+            scope for scope in scopes
+            if scope not in (getattr(credentials, 'scopes', None) or [])
+        ]:
+            logger.debug(f'Missing credential scopes: {missing_scopes}')
+            if not self._oauth_flow:
+                raise RuntimeError('Credentials not found and OAuth flow is not allowed')
+            credentials = self._get_scoped_oauth_credentials(
+                organization=organization,
+                project=project,
+                scopes=scopes,
+                oauth_credentials_key=oauth_credentials_key,
+                oauth_client_secrets_key=oauth_client_secrets_key,
+            )
+
+        return credentials  # type: ignore[no-any-return]
+
     def credentials(  # pylint: disable=too-many-arguments
         self,
         *,
         organization: str | None = None,
         project: str | None = None,
         scopes: Iterable[str] | None = None,
+        all_scopes: bool = True,
         oauth_credentials_key: str | None = None,
         oauth_client_secrets_key: str | None = None,
     ) -> Credentials:
@@ -227,7 +305,7 @@ class GCPAuth(Auth):
         Return the organization credentials or the application default credentials.
 
         If the obtained credentials does not have the necessary scopes, an OAuth 2.0 flow is
-        triggered. The client ID and client secret are loaded from Secret Manager as a
+        triggered (if allowed). The client ID and client secret are loaded from Secret Manager as a
         string-encoded JSON object with the ``client_id`` and ``client_secret`` keys. The client ID
         and client secret can be obtained by creating a new OAuth 2.0 desktop client in Google
         Cloud console (under https://console.cloud.google.com/apis/credentials).
@@ -236,6 +314,8 @@ class GCPAuth(Auth):
             organization: The organization name to use.
             project: The project name to use.
             scopes: The scopes to request.
+            all_scopes: Whether to request all auth scopes of the instance or only the specified
+                scopes.
             oauth_credentials_key: The Secret Manager key to use for caching the
                 obtained OAuth 2.0 credentials. Defaults to the ``oauth_credentials_key`` value set
                 in ``pyproject.toml`` under the ``tool.stormware.google`` section, or
@@ -250,53 +330,19 @@ class GCPAuth(Auth):
         """
         organization_id = self.organization_id(organization=organization)
         project = self.project(project)
-        scopes_tuple = tuple(scopes or [])
+        scopes = tuple(self._all_scopes(scopes) if all_scopes else scopes or [])
 
-        credentials: Credentials
         logger.debug(
             f'Loading credentials for organization ID "{organization_id}" and project "{project}"'
         )
-
-        if cached_credentials := self._credentials.get((organization_id, project, scopes_tuple)):
+        if cached_credentials := self._credentials.get((organization_id, project, scopes)):
             logger.debug('Using cached credentials')
             return cached_credentials
 
-        if path := self.credentials_path(organization=organization):
-            project_id = self.project_id(organization=organization, project=project)
-            logger.debug(f'Loading credentials from file "{path}"')
-            info = json.loads(path.read_text())
-            credentials = (
-                OAuth2Credentials
-                .from_authorized_user_info(info=info)  # type: ignore[no-untyped-call]
-                .with_quota_project(project_id)
-            )
-            if service_account := self._config.get('service_account'):
-                logger.debug(f'Impersonating "{service_account}"')
-                credentials = (
-                    impersonated_credentials.Credentials(  # type: ignore[no-untyped-call]
-                        source_credentials=credentials,
-                        target_principal=service_account,
-                        target_scopes=GCPAuth.SCOPES,
-                        quota_project_id=project_id,
-                    )
-                )
-        else:
-            logger.debug('Loading default credentials')
-            credentials = default()[0]
-
-        # Check credential scopes
-        if missing_scopes := [
-            scope for scope in scopes_tuple
-            if scope not in (getattr(credentials, 'scopes', None) or [])
-        ]:
-            logger.debug(f'Missing credential scopes: {missing_scopes}')
-            credentials = self._get_scoped_credentials(
-                organization=organization,
-                project=project,
-                scopes=scopes,
-                oauth_credentials_key=oauth_credentials_key,
-                oauth_client_secrets_key=oauth_client_secrets_key,
-            )
-
-        self._credentials[(organization_id, project, scopes_tuple)] = credentials
+        credentials = self._get_credentials(
+            organization=organization, project=project, scopes=scopes,
+            oauth_credentials_key=oauth_credentials_key,
+            oauth_client_secrets_key=oauth_client_secrets_key,
+        )
+        self._credentials[(organization_id, project, scopes)] = credentials
         return credentials

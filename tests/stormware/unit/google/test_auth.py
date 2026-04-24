@@ -25,9 +25,9 @@ def test_project_error(mocker: MockerFixture) -> None:
 
 
 def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
-    oauth2_credentials = mocker.Mock(name='oauth2_credentials')
+    oauth2_credentials = mocker.Mock(name='oauth2_credentials', scopes=['test'])
     impersonated_credentials = mocker.Mock(name='impersonated_credentials')
-    default_credentials = mocker.Mock(name='default_credentials')
+    default_credentials = mocker.Mock(name='default_credentials', scopes=['test'])
 
     tool_config = mocker.patch('stormware.google.auth.tool_config', return_value={})
     mocker.patch('stormware.google.auth.xdg_config_home', return_value=tmp_path)
@@ -40,7 +40,7 @@ def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch('stormware.google.auth.impersonated_credentials.Credentials',
                  return_value=impersonated_credentials)
     mocker.patch('stormware.google.auth.default', return_value=[default_credentials, None])
-    auth = GCPAuth()
+    auth = GCPAuth(scopes=['test'])
 
     # Organization credentials
     assert auth.credentials(organization='example.org') == oauth2_credentials
@@ -75,7 +75,7 @@ def test_scoped_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
 
     # Non-interactive flow error
     logger.info('Testing non-interactive session flow error')
-    auth = GCPAuth(ignore_cached_oauth_credentials=True)
+    auth = GCPAuth(scopes=['test'], ignore_cached_oauth_credentials=True)
     is_tty.return_value = False
     with raises(RuntimeError, match='not an interactive session'):
         auth.credentials(organization='example.org', scopes=['test'])
@@ -88,7 +88,7 @@ def test_scoped_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
 
     # Cache load (Secret Manager)
     logger.info('Testing Secret Manager cache load')
-    auth = GCPAuth()
+    auth = GCPAuth(scopes=['test'])
     cached_credentials = mocker.Mock(name='cached_credentials')
     user_info = mocker.patch('stormware.google.auth.OAuth2Credentials.from_authorized_user_info')
     user_info.return_value = cached_credentials
@@ -107,14 +107,20 @@ def test_scoped_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
     auth.clear_cache()
     assert auth.credentials(organization='example.org', scopes=['test']) == cached_credentials
 
-    # User email error
+    # User email error (new scope)
     logger.info('Testing user email error')
     mocker.patch('stormware.google.auth.id_token.verify_oauth2_token', return_value={
         'email': 'test.user@logikal.io',
     })
     auth = GCPAuth(
+        scopes=['scope'],
         oauth_user_email='non-matching@logikal.io',
         ignore_cached_oauth_credentials=True,
     )
     with raises(RuntimeError, match='Invalid email address'):
-        auth.credentials(organization='example.org', scopes=['scope'])
+        auth.credentials(organization='example.org', scopes=['new-scope'], all_scopes=False)
+
+    # Scope error
+    logger.info('Testing scope error')
+    with raises(RuntimeError, match='Auth scope .* has not been registered'):
+        auth.credentials(organization='example.org', scopes=['new-scope'])

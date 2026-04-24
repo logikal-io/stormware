@@ -1,7 +1,10 @@
 from pandas.testing import assert_frame_equal
 
+from stormware.google.auth import GCPAuth
 from stormware.google.bigquery import BigQuery
 from tests.stormware.integration.data.dataframes import TEST_DATA
+
+GCPAuth.register(BigQuery)
 
 
 def test_set_get() -> None:

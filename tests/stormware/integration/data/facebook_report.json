@@ -10,6 +10,7 @@
       {"action_type": "page_engagement", "value": "1"},
       {"action_type": "post_engagement", "value": "1"},
       {"action_type": "post_interaction_gross", "value": "1"},
+      {"action_type": "post_interaction_net", "value": "1"},
       {"action_type": "post_reaction", "value": "1"}
     ],
     "date_start": "2026-02-28",
@@ -18,6 +19,7 @@
     "actions:page_engagement": 1,
     "actions:post_engagement": 1,
     "actions:post_interaction_gross": 1,
+    "actions:post_interaction_net": 1,
     "actions:post_reaction": 1
   }
 ]

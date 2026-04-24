@@ -14,11 +14,14 @@ from pandas.api import types
 
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
+from stormware.google.connector import Connector
 
 logger = getLogger(__name__)
 
 
-class Spreadsheet(ClientManager[Any]):
+class Spreadsheet(Connector, ClientManager[Any]):
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+
     def __init__(
         self,
         key: str,
@@ -45,7 +48,8 @@ class Spreadsheet(ClientManager[Any]):
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
     def create_client(self) -> Any:
-        client = build('sheets', 'v4', credentials=self.auth.credentials(), cache_discovery=False)
+        credentials = self.auth.credentials(scopes=self.SCOPES)
+        client = build('sheets', 'v4', credentials=credentials, cache_discovery=False)
         return client.spreadsheets()  # pylint: disable=no-member
 
     def add_sheet(self, name: str, properties: dict[str, Any] | None = None) -> int:

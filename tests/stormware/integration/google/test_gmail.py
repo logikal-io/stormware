@@ -3,7 +3,10 @@ from pathlib import Path
 
 from pytest import raises
 
+from stormware.google.auth import GCPAuth
 from stormware.google.gmail import Address, Gmail, Label, Message, Query
+
+GCPAuth.register(Gmail)
 
 
 def test_labels(gmail: Gmail) -> None:

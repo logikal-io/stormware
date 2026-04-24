@@ -1,6 +1,9 @@
 from datetime import datetime
 
+from stormware.google.auth import GCPAuth
 from stormware.google.secrets import SecretManager
+
+GCPAuth.register(SecretManager)
 
 SECRET_KEY = 'stormware-test'  # nosec, only used for testing
 SECRET_KEY_NONEXISTENT = f'{SECRET_KEY}-non-existent'

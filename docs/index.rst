@@ -59,6 +59,7 @@ Finally, we push the data into the desired spreadsheet:
 
 .. jupyter-execute::
 
+    from stormware.google.auth import GCPAuth
     from stormware.google.sheets import Spreadsheet
 
     with Spreadsheet(key='1VV0cBAVeFTA5WUXYLvwmgZJtv-vV-q2uYr40lDAH3HA') as sheet:
@@ -68,6 +69,7 @@ Of course, if we wanted to push the data into Google BigQuery as well, it would 
 
 .. jupyter-execute::
 
+    from stormware.google.auth import GCPAuth
     from stormware.google.bigquery import BigQuery
 
     with BigQuery() as bigquery:

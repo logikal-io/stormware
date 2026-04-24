@@ -6,17 +6,20 @@ from collections.abc import Iterable
 from logging import getLogger
 
 import google_crc32c
-from google.api_core.exceptions import FailedPrecondition, PermissionDenied
+from google.api_core.exceptions import FailedPrecondition, NotFound, PermissionDenied
 from google.cloud.secretmanager import SecretManagerServiceClient, SecretVersion
 
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
+from stormware.google.connector import Connector
 from stormware.secrets import SecretStore
 
 logger = getLogger(__name__)
 
 
-class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
+class SecretManager(Connector, SecretStore, ClientManager[SecretManagerServiceClient]):
+    SCOPES = ['https://www.googleapis.com/auth/cloud-platform']
+
     def __init__(
         self,
         organization: str | None = None,
@@ -116,7 +119,7 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
         """
         try:
             return self[key]
-        except (PermissionDenied, FailedPrecondition):
+        except (PermissionDenied, FailedPrecondition, NotFound):
             return default
 
     def __contains__(self, key: str) -> bool:
@@ -129,7 +132,7 @@ class SecretManager(SecretStore, ClientManager[SecretManagerServiceClient]):
         logger.debug(f'Checking if secret "{name}" exists')
         try:
             return bool(self.client.get_secret(name=name))
-        except (PermissionDenied, FailedPrecondition):
+        except (PermissionDenied, FailedPrecondition, NotFound):
             return False
 
     def _secret_path(self, key: str) -> str:

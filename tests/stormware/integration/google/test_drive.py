@@ -6,9 +6,12 @@ from time import sleep
 from pytest import mark, param, raises
 from pytest_mock import MockerFixture
 
+from stormware.google.auth import GCPAuth
 from stormware.google.drive import Drive, DrivePath
 
 logger = getLogger(__name__)
+
+GCPAuth.register(Drive)
 
 # Local paths
 TEST_FOLDER_PATH = Path(__file__).parents[1] / 'data/Stormware Test - upload'
