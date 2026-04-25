@@ -18,7 +18,6 @@ from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 from google.oauth2.credentials import Credentials as OAuth2Credentials
 from google_auth_oauthlib import get_user_credentials
-from googleapiclient.discovery import build
 from logikal_utils.operators import unique
 from logikal_utils.project import PYPROJECT, tool_config
 from xdg_base_dirs import xdg_config_home
@@ -197,8 +196,9 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
     def _valid_oauth_credentials(
         self,
         credentials: OAuth2Credentials,
-        client_id: str,
         scopes: Iterable[str] | None,
+        client_id: str | None = None,
+        email: str | None = None,
         raise_error: bool = True,
     ) -> bool:
         def raise_or_log_message(message: str) -> None:
@@ -217,7 +217,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
 
         # Check email
         # (see https://developers.google.com/identity/gsi/web/guides/verify-google-id-token)
-        if not self._oauth_user_email:
+        if not email:
             return True
 
         logger.debug('Checking credential owner')
@@ -235,9 +235,9 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
             raise_or_log_message('Credential owner email is unverified')
             return False
 
-        if id_info['email'] != self._oauth_user_email:
+        if id_info['email'] != email:
             raise_or_log_message(
-                f'Invalid credential owner email address (expected "{self._oauth_user_email}", '
+                f'Invalid credential owner email address (expected "{email}", '
                 f'got "{id_info['email']}")'
             )
             return False
@@ -301,8 +301,9 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
                 ):
                     if self._valid_oauth_credentials(
                         credentials=stored_credentials,
-                        client_id=client_secrets['client_id'],
                         scopes=config.scopes,
+                        client_id=client_secrets['client_id'],
+                        email=self._oauth_user_email,
                         raise_error=False,
                     ):
                         return stored_credentials
@@ -326,8 +327,9 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
             # Check credentials
             self._valid_oauth_credentials(
                 credentials=credentials,
-                client_id=client_secrets['client_id'],
                 scopes=config.scopes,
+                client_id=client_secrets['client_id'],
+                email=self._oauth_user_email,
             )
 
             # Store credentials
@@ -358,16 +360,6 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         logger.debug('Loading application default credentials')
         return default()[0]
 
-    def _credential_user_info(self, credentials: Credentials) -> str | None:
-        logger.debug('Loading credential user info')
-        self._refresh_credentials(credentials=credentials)
-        client = build('oauth2', 'v2', credentials=credentials, cache_discovery=False)
-        try:
-            user_info = client.userinfo().get().execute()
-        finally:
-            client.close()
-        return user_info
-
     def _get_credentials(self, config: Config) -> Credentials:
         credentials = self._get_core_credentials(config=config)
 
@@ -375,7 +367,11 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         if not self._service_account_email:
             return credentials
 
-        if self._credential_user_info(credentials).get('email') == self._service_account_email:
+        logger.debug('Checking credential owner email before impersonation')
+        if isinstance(credentials, OAuth2Credentials) and self._valid_oauth_credentials(
+            credentials=credentials, scopes=config.scopes, email=self._service_account_email,
+            raise_error=False,
+        ):
             logger.debug('Credential owner email matches service account, skipping impersonation')
             return credentials
 
