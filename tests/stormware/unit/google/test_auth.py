@@ -26,7 +26,7 @@ def test_project_error(mocker: MockerFixture) -> None:
 
 
 def test_register(mocker: MockerFixture) -> None:
-    scopes = mocker.patch.object(GCPAuth, 'OAUTH_SCOPES')
+    mocker.patch.object(GCPAuth, 'OAUTH_SCOPES')
     GCPAuth.register(SecretManager)
     assert GCPAuth.OAUTH_SCOPES == SecretManager.SCOPES
 
