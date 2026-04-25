@@ -1,11 +1,8 @@
 from pandas.testing import assert_frame_equal
 from pytest import raises
 
-from stormware.google.auth import GCPAuth
 from stormware.google.sheets import Spreadsheet
 from tests.stormware.integration.data.dataframes import SIMPLE_TEST_DATA, TEST_DATA
-
-GCPAuth.register(Spreadsheet)
 
 
 def test_set_get(sheet: Spreadsheet) -> None:

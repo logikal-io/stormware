@@ -22,7 +22,7 @@ looks for a set of credentials in the
 ``$XDG_CONFIG_HOME/gcloud/credentials/{configuration}.json`` file, where ``configuration`` defaults
 to the ``organization_id``, which is derived from the provided ``organization`` value by replacing
 dots with dashes. If the credentials file does not exist, we use the application default
-credentials, and if that does not exist either, we trigger an OAuth 2.0 flow.
+credentials.
 
 .. note::
 

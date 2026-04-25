@@ -198,7 +198,6 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         credentials: OAuth2Credentials,
         scopes: Iterable[str] | None,
         client_id: str | None = None,
-        email: str | None = None,
         raise_error: bool = True,
     ) -> bool:
         def raise_or_log_message(message: str) -> None:
@@ -217,7 +216,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
 
         # Check email
         # (see https://developers.google.com/identity/gsi/web/guides/verify-google-id-token)
-        if not email:
+        if not self._oauth_user_email:
             return True
 
         logger.debug('Checking credential owner')
@@ -235,9 +234,9 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
             raise_or_log_message('Credential owner email is unverified')
             return False
 
-        if id_info['email'] != email:
+        if id_info['email'] != self._oauth_user_email:
             raise_or_log_message(
-                f'Invalid credential owner email address (expected "{email}", '
+                f'Invalid credential owner email address (expected "{self._oauth_user_email}", '
                 f'got "{id_info['email']}")'
             )
             return False
@@ -303,7 +302,6 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
                         credentials=stored_credentials,
                         scopes=config.scopes,
                         client_id=client_secrets['client_id'],
-                        email=self._oauth_user_email,
                         raise_error=False,
                     ):
                         return stored_credentials
@@ -329,7 +327,6 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
                 credentials=credentials,
                 scopes=config.scopes,
                 client_id=client_secrets['client_id'],
-                email=self._oauth_user_email,
             )
 
             # Store credentials
