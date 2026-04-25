@@ -18,6 +18,7 @@ from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 from google.oauth2.credentials import Credentials as OAuth2Credentials
 from google_auth_oauthlib import get_user_credentials
+from googleapiclient.discovery import build
 from logikal_utils.operators import unique
 from logikal_utils.project import PYPROJECT, tool_config
 from xdg_base_dirs import xdg_config_home
@@ -357,11 +358,25 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         logger.debug('Loading application default credentials')
         return default()[0]
 
+    def _credential_user_info(self, credentials: Credentials) -> str | None:
+        logger.debug('Loading credential user info')
+        self._refresh_credentials(credentials=credentials)
+        client = build('oauth2', 'v2', credentials=credentials, cache_discovery=False)
+        try:
+            user_info = client.userinfo().get().execute()
+        finally:
+            client.close()
+        return user_info
+
     def _get_credentials(self, config: Config) -> Credentials:
         credentials = self._get_core_credentials(config=config)
 
         # Impersonation
         if not self._service_account_email:
+            return credentials
+
+        if self._credential_user_info(credentials).get('email') == self._service_account_email:
+            logger.debug('Credential owner email matches service account, skipping impersonation')
             return credentials
 
         logger.debug(f'Impersonating "{self._service_account_email}"')

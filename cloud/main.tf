@@ -225,6 +225,7 @@ resource "google_service_account_iam_member" "test_service_user_access" {
 resource "google_project_iam_member" "test_project_access" {
   for_each = toset([
     "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}",
+    "group:software@logikal.io",
     "user:test.user@logikal.io",
   ])
 
