@@ -368,7 +368,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
             return credentials
 
         logger.debug('Checking credential owner email before impersonation')
-        if isinstance(credentials, OAuth2Credentials) and self._valid_oauth_credentials(
+        if self._valid_oauth_credentials(
             credentials=credentials, scopes=config.scopes, email=self._service_account_email,
             raise_error=False,
         ):
