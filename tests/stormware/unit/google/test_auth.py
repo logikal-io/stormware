@@ -6,6 +6,7 @@ from pytest import raises
 from pytest_mock import MockerFixture
 
 from stormware.google.auth import GCPAuth
+from stormware.google.secrets import SecretManager
 
 logger = getLogger(__name__)
 
@@ -22,6 +23,12 @@ def test_project_error(mocker: MockerFixture) -> None:
     mocker.patch.dict(PYPROJECT, {'project': {}, 'tool': {'stormware': {'project': None}}})
     with raises(ValueError, match='You must provide a project'):
         GCPAuth().project()
+
+
+def test_register(mocker: MockerFixture) -> None:
+    scopes = mocker.patch.object(GCPAuth, 'OAUTH_SCOPES')
+    GCPAuth.register(SecretManager)
+    assert GCPAuth.OAUTH_SCOPES == SecretManager.SCOPES
 
 
 def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
