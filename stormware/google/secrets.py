@@ -115,7 +115,7 @@ class SecretManager(Connector, SecretStore, ClientManager[SecretManagerServiceCl
 
     def get(self, key: str, default: str | None = None) -> str | None:
         """
-        Retrieve the secret under the given key if it exists, otherwise return the default value.
+        Retrieve the secret under the given key if it exists and has an active version.
         """
         try:
             return self[key]

@@ -48,6 +48,33 @@ resource "google_secret_manager_secret" "test" {
   depends_on = [google_project_service.secret_manager]
 }
 
+resource "google_secret_manager_secret" "test_empty" {
+  secret_id = "stormware-test-empty"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secret_manager]
+}
+
+resource "google_secret_manager_secret" "test_disabled" {
+  secret_id = "stormware-test-disabled"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secret_manager]
+}
+
+resource "google_secret_manager_secret" "test_destroyed" {
+  secret_id = "stormware-test-destroyed"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secret_manager]
+}
+
 resource "google_secret_manager_secret" "facebook" {
   secret_id = "stormware-facebook"
   replication {
@@ -105,6 +132,18 @@ resource "google_secret_manager_secret_iam_member" "test_setter" {
 
   secret_id = google_secret_manager_secret.test.id
   role = each.key
+  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
+}
+
+resource "google_secret_manager_secret_iam_member" "test_viewer" {
+  for_each = toset([
+    google_secret_manager_secret.test_empty.id,
+    google_secret_manager_secret.test_disabled.id,
+    google_secret_manager_secret.test_destroyed.id,
+  ])
+
+  secret_id = each.key
+  role = "roles/secretmanager.viewer"
   member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
 }
 
@@ -184,7 +223,12 @@ resource "google_service_account_iam_member" "test_service_user_access" {
 }
 
 resource "google_project_iam_member" "test_project_access" {
+  for_each = toset([
+    "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}",
+    "user:test.user@logikal.io",
+  ])
+
   project = var.project_id
   role = "roles/serviceusage.serviceUsageConsumer"
-  member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
+  member = each.key
 }
