@@ -19,7 +19,7 @@ from google.oauth2 import id_token
 from google.oauth2.credentials import Credentials as OAuth2Credentials
 from google_auth_oauthlib import get_user_credentials
 from logikal_utils.operators import unique
-from logikal_utils.project import PYPROJECT, tool_config
+from logikal_utils.project import project_name, tool_config
 from xdg_base_dirs import xdg_config_home
 
 from stormware.auth import Auth
@@ -85,7 +85,8 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
                 in ``pyproject.toml`` under the ``tool.stormware.google`` section, or
                 ``stormware-google-oauth-credentials`` if not set. If the secret does not exist,
                 the credentials will be cached using local storage under
-                ``$XDG_CONFIG_HOME/stormware/google/{oauth_credentials_key}.json``.
+                ``$XDG_CONFIG_HOME/stormware/{project}/google/{oauth_credentials_key}.json``, where
+                ``project`` is the ``project.name`` value in the ``pyproject.toml`` file.
             oauth_client_secrets_key: The Secret Manager key for the OAuth 2.0 client ID and client
                 secrets. Defaults to the ``oauth_client_secrets_key`` value set in
                 ``pyproject.toml`` under the ``tool.stormware.google`` section, or
@@ -110,7 +111,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
             'oauth_client_secrets_key', GCPAuth.DEFAULT_OAUTH_CLIENT_SECRETS_KEY,
         )
 
-        self._local_config = xdg_config_home() / 'stormware/google'
+        self._local_config = xdg_config_home() / f'stormware/{project_name()}/google'
         self._gcloud_config = xdg_config_home() / 'gcloud'
         self._credentials: dict[Config, Credentials] = {}
 
@@ -147,7 +148,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         project = (
             project or self._project
             or tool_config('stormware').get('project')
-            or PYPROJECT.get('project', {}).get('name')
+            or project_name(raise_error_on_missing=False)
         )
         if not project:
             raise ValueError('You must provide a project')

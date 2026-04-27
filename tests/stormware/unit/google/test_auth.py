@@ -20,7 +20,8 @@ def test_project() -> None:
 
 
 def test_project_error(mocker: MockerFixture) -> None:
-    mocker.patch.dict(PYPROJECT, {'project': {}, 'tool': {'stormware': {'project': None}}})
+    mocker.patch('stormware.google.auth.project_name', return_value=None)
+    mocker.patch.dict(PYPROJECT, {'tool': {'stormware': {'project': None}}})
     with raises(ValueError, match='You must provide a project'):
         GCPAuth().project()
 
@@ -136,8 +137,8 @@ def test_oauth_credentials(  # pylint: disable=too-many-statements
     auth.clear_cache()
     del secrets[GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY]
     assert auth.credentials() == user_credentials
-    cache_path = tmp_path / f'stormware/google/{GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY}.json'
-    assert cache_path.read_text() == user_credentials.to_json()
+    cache_file_name = f'stormware/stormware/google/{GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY}.json'
+    assert (tmp_path / cache_file_name).read_text() == user_credentials.to_json()
 
     logger.info('Testing interactive flow (any user, not cached, stored in local storage)')
     auth.clear_cache()
