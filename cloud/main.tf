@@ -217,9 +217,14 @@ resource "aws_iam_role_policy_attachment" "test_secret_access" {
 }
 
 resource "google_service_account_iam_member" "test_service_user_access" {
+  for_each = toset([
+    "serviceAccount:docs-publisher@docs-logikal-io.iam.gserviceaccount.com",
+    "group:software@logikal.io",
+  ])
+
   service_account_id = module.gcp_github_auth.service_accounts["testing"].id
   role = "roles/iam.serviceAccountTokenCreator"
-  member = "group:software@logikal.io"
+  member = each.key
 }
 
 resource "google_project_iam_member" "test_project_access" {
