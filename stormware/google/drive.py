@@ -15,6 +15,7 @@ from googleapiclient.http import MediaFileUpload
 
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
+from stormware.google.connector import Connector
 
 logger = getLogger(__name__)
 
@@ -83,7 +84,9 @@ class DrivePath(PurePath):
         return f'gdrive:{str(self)}'
 
 
-class Drive(ClientManager[Any]):
+class Drive(Connector, ClientManager[Any]):
+    SCOPES = ['https://www.googleapis.com/auth/drive']
+
     def __init__(
         self,
         organization: str | None = None,
@@ -108,7 +111,8 @@ class Drive(ClientManager[Any]):
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
     def create_client(self) -> Any:
-        return build('drive', 'v3', credentials=self.auth.credentials(), cache_discovery=False)
+        credentials = self.auth.credentials(scopes=self.SCOPES)
+        return build('drive', 'v3', credentials=credentials, cache_discovery=False)
 
     def _drive_id(self, name: str) -> str:
         if name in self._drive_id_cache:

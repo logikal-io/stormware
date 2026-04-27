@@ -45,6 +45,8 @@ You can install the Google connectors through the ``google`` extra:
     mechanism described in the :ref:`auth:Google Cloud Platform` section of the authentication
     documentation.
 
+.. autoclass:: stormware.google.connector.Connector
+
 Google BigQuery
 ~~~~~~~~~~~~~~~
 .. autoclass:: stormware.google.bigquery.BigQuery

@@ -9,11 +9,14 @@ from pandas import DataFrame
 
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
+from stormware.google.connector import Connector
 
 logger = getLogger(__name__)
 
 
-class BigQuery(ClientManager[bigquery.Client]):
+class BigQuery(Connector, ClientManager[bigquery.Client]):
+    SCOPES = ['https://www.googleapis.com/auth/bigquery']
+
     def __init__(
         self,
         organization: str | None = None,
@@ -36,7 +39,7 @@ class BigQuery(ClientManager[bigquery.Client]):
 
     def create_client(self) -> bigquery.Client:
         return bigquery.Client(
-            credentials=self.auth.credentials(),
+            credentials=self.auth.credentials(scopes=self.SCOPES),
             project=self.auth.project_id(),
         )
 

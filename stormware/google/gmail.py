@@ -16,6 +16,7 @@ from googleapiclient.discovery import build
 
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
+from stormware.google.connector import Connector
 
 logger = getLogger(__name__)
 
@@ -118,7 +119,9 @@ class Query:  # pylint: disable=too-many-instance-attributes
         return ' '.join(query)
 
 
-class Gmail(ClientManager[Any]):
+class Gmail(Connector, ClientManager[Any]):
+    SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
     def __init__(
         self,
         organization: str | None = None,
@@ -142,9 +145,7 @@ class Gmail(ClientManager[Any]):
         self.auth = auth or GCPAuth(organization=organization, project=project)
 
     def create_client(self) -> Any:
-        credentials = self.auth.credentials(scopes=[
-            'https://www.googleapis.com/auth/gmail.readonly',
-        ])
+        credentials = self.auth.credentials(scopes=self.SCOPES)
         return build('gmail', 'v1', credentials=credentials, cache_discovery=False)
 
     def labels(self, *, user_id: str = 'me') -> list[Label]:

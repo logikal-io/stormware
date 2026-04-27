@@ -1,4 +1,4 @@
-logikal-utils~=1.6
+logikal-utils~=1.9
 pandas~=3.0
 pandas-stubs~=3.0
 xdg-base-dirs~=6.0

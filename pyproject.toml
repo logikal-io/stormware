@@ -44,7 +44,7 @@ packages = ['stormware', 'stormware.amazon', 'stormware.google']
 organization = 'logikal.io'
 
 [tool.stormware.google]
-service_account = 'testing@stormware-logikal-io.iam.gserviceaccount.com'
+service_account_email = 'testing@stormware-logikal-io.iam.gserviceaccount.com'
 
 [[tool.mypy.overrides]]
 ignore_missing_imports = true
