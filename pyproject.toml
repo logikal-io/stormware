@@ -1,5 +1,5 @@
 [build-system]
-requires = ['setuptools>=64', 'setuptools-scm>=8']
+requires = ['setuptools>=80', 'setuptools-scm[simple]>=10']
 build-backend = 'setuptools.build_meta'
 
 [project]
@@ -38,8 +38,6 @@ facebook = {file = 'requirements/extras/facebook.txt'}
 [tool.setuptools]
 packages = ['stormware', 'stormware.amazon', 'stormware.google']
 
-[tool.setuptools_scm]
-
 [tool.stormware]
 organization = 'logikal.io'
 
@@ -58,8 +56,3 @@ module = [
 addopts = ['-m', 'not integration']
 markers = ['integration']
 norecursedirs = ['build', 'docs/jupyter_execute']
-filterwarnings = [
-  'error',
-  # See https://github.com/googleapis/google-auth-library-python-oauthlib/issues/442
-  'ignore:datetime.datetime.utcfromtimestamp:DeprecationWarning',
-]

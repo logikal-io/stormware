@@ -1,1 +1,1 @@
-facebook-business==24.0.1
+facebook-business==25.0.1
