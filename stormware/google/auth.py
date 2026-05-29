@@ -192,7 +192,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
     def _refresh_credentials(credentials: OAuth2Credentials) -> None:
         if not credentials.valid or not credentials.id_token:
             logger.debug('Refreshing credentials')
-            credentials.refresh(request=Request())
+            credentials.refresh(request=Request())  # type: ignore[no-untyped-call]
 
     def _valid_oauth_credentials(
         self,
