@@ -48,6 +48,8 @@ service_account_email = 'testing@stormware-logikal-io.iam.gserviceaccount.com'
 ignore_missing_imports = true
 module = [
   'facebook_business.*',
+  'google.ads.googleads.client',
+  'google.protobuf.*',
   'googleapiclient.*',
   'google_auth_oauthlib',
 ]
@@ -56,3 +58,9 @@ module = [
 addopts = ['-m', 'not integration']
 markers = ['integration']
 norecursedirs = ['build', 'docs/jupyter_execute']
+
+[tool.coverage.report]
+omit = [
+  'stormware/google/ads.py',  # not tested yet
+  'tests/stormware/integration/google/test_ads.py',  # not tested yet
+]

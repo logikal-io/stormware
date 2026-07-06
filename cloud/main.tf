@@ -102,6 +102,15 @@ resource "google_secret_manager_secret" "google_oauth_credentials" {
   depends_on = [google_project_service.secret_manager]
 }
 
+resource "google_secret_manager_secret" "google_ads" {
+  secret_id = "stormware-google-ads"
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secret_manager]
+}
+
 resource "aws_secretsmanager_secret" "test" {
   name = "stormware-test"
   recovery_window_in_days = 0
@@ -171,6 +180,14 @@ resource "google_secret_manager_secret_iam_member" "google_oauth_credentials_set
   secret_id = google_secret_manager_secret.google_oauth_credentials.id
   role = each.key
   member = "serviceAccount:${module.gcp_github_auth.service_account_emails["testing"]}"
+}
+
+resource "google_secret_manager_secret_iam_member" "google_ads_accessor" {
+  for_each = local.service_accounts
+
+  secret_id = google_secret_manager_secret.google_ads.id
+  role = "roles/secretmanager.secretAccessor"
+  member = "serviceAccount:${each.key}"
 }
 
 resource "google_project_iam_member" "bigquery_job_user" {

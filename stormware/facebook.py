@@ -20,10 +20,10 @@ logger = getLogger(__name__)
 
 
 class FacebookAds:
-    def __init__(  # nosec: we only have a hardcoded path to a secret, not a secret
+    def __init__(
         self,
         account_name: str | None = None,
-        secret_key: str = 'stormware-facebook',
+        secret_key: str = 'stormware-facebook',  # nosec: only path to the secret
         secret_store: SecretStore | None = None,
     ):
         """
