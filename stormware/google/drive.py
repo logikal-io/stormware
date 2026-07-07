@@ -167,7 +167,7 @@ class Drive(Connector, ClientManager[Any]):
     def _escape_query_parameter(value: str) -> str:
         return value.replace('\\', '\\\\').replace("'", r"\'")
 
-    def _file_ids(  # pylint: disable=too-many-arguments
+    def _file_ids(
         self,
         *,
         parent_id: str,
@@ -287,7 +287,7 @@ class Drive(Connector, ClientManager[Any]):
         logger.debug(f'Created path file ID: {parent_id}')
         return parent_id
 
-    def _upload_file(  # pylint: disable=too-many-arguments
+    def _upload_file(
         self,
         *,
         src: Path,

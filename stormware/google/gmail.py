@@ -260,7 +260,7 @@ class Gmail(Connector, ClientManager[Any]):
 
         return message
 
-    def download_attachment(  # pylint: disable=too-many-arguments
+    def download_attachment(
         self,
         attachment: Attachment,
         *,
