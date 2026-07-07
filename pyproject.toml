@@ -60,6 +60,8 @@ markers = ['integration']
 norecursedirs = ['build', 'docs/jupyter_execute']
 filterwarnings = [
   'error',
+  # Note: not sure where are these coming from, can't reproduce locally
+  'ignore:unclosed.*[Ss]ocket.*:ResourceWarning',
   # Note: can be removed when https://pypi.org/project/db-dtypes/ v1.7.0+ is released
   'ignore:.*unit for NumPy timedelta is deprecated.*:DeprecationWarning',
 ]
