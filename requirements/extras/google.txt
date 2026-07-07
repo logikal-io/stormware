@@ -1,8 +1,8 @@
-google-ads==31.1.0
-google-api-python-client==2.197.0
-google-auth==2.53.0
-google-auth-oauthlib==1.4.0
-google-cloud-bigquery[pandas]==3.42.1
-google-cloud-bigquery-storage~=2.38
-google-cloud-secret-manager==2.28.0
-google-crc32c==1.8.0
+google-ads~=31.0
+google-api-python-client~=2.197
+google-auth~=2.53
+google-auth-oauthlib~=1.4
+google-cloud-bigquery[pandas]~=3.41
+google-cloud-bigquery-storage~=2.39
+google-cloud-secret-manager~=2.29
+google-crc32c~=1.8
