@@ -6,7 +6,7 @@ Google Sheets API connector.
 # - Drive API: https://developers.google.com/drive/api
 from collections import defaultdict
 from logging import getLogger
-from os import PathLike
+from os import PathLike, walk
 from pathlib import Path, PurePath
 from typing import Any, cast
 
@@ -167,7 +167,7 @@ class Drive(Connector, ClientManager[Any]):
     def _escape_query_parameter(value: str) -> str:
         return value.replace('\\', '\\\\').replace("'", r"\'")
 
-    def _file_ids(  # pylint: disable=too-many-arguments
+    def _file_ids(
         self,
         *,
         parent_id: str,
@@ -188,7 +188,7 @@ class Drive(Connector, ClientManager[Any]):
         if folders is not None:
             query += f" and mimeType {'=' if folders else '!='} '{MIME_TYPE_FOLDER}'"
         if in_trash is not None:
-            query += f' and trashed = {'true' if in_trash else 'false'}'
+            query += f' and trashed = {"true" if in_trash else "false"}'
 
         # Load files
         files: list[dict[str, str]] = []
@@ -201,7 +201,7 @@ class Drive(Connector, ClientManager[Any]):
                 corpora='drive' if drive_id else 'user',
                 q=query,
                 spaces='drive',
-                fields=f'nextPageToken, files({'id' if name else 'id, name'})',
+                fields=f'nextPageToken, files({"id" if name else "id, name"})',
                 supportsAllDrives=True,
                 driveId=drive_id,
                 includeItemsFromAllDrives=bool(drive_id),
@@ -287,7 +287,7 @@ class Drive(Connector, ClientManager[Any]):
         logger.debug(f'Created path file ID: {parent_id}')
         return parent_id
 
-    def _upload_file(  # pylint: disable=too-many-arguments
+    def _upload_file(
         self,
         *,
         src: Path,
@@ -317,7 +317,7 @@ class Drive(Connector, ClientManager[Any]):
             fields='id',
             supportsAllDrives=True,
         ).execute()
-        logger.debug(f'Uploaded file ID: {response.get('id')}')
+        logger.debug(f'Uploaded file ID: {response.get("id")}')
 
     def _upload_file_to_path(self, src: Path, dst: DrivePath, overwrite: bool | None) -> None:
         logger.info(f'Uploading file "{src}" to "{dst}"')
@@ -338,7 +338,10 @@ class Drive(Connector, ClientManager[Any]):
     def _upload_folder_to_path(self, src: Path, dst: DrivePath, overwrite: bool | None) -> None:
         logger.info(f'Uploading folder "{src}" to "{dst}"')
         drive_id = self._drive_id(dst.drive) if dst.drive else None
-        for path, _, filenames in src.walk():
+        # Note: we can use src.walk as follows when dropping support for Python 3.11:
+        # for path, _, filenames in src.walk():
+        for path_str, _, filenames in walk(src):
+            path = Path(path_str)
             dst_folder = dst / src.name / path.relative_to(src)
             logger.info(f'Uploading subfolder "{path}" to "{dst_folder}"')
             parent_id = self._create_folder_at_path(dst_folder)

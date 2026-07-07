@@ -47,6 +47,10 @@ You can install the Google connectors through the ``google`` extra:
 
 .. autoclass:: stormware.google.connector.Connector
 
+Google Ads
+~~~~~~~~~~
+.. autoclass:: stormware.google.ads.GoogleAds
+
 Google BigQuery
 ~~~~~~~~~~~~~~~
 .. autoclass:: stormware.google.bigquery.BigQuery

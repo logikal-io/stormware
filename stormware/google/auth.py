@@ -238,7 +238,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         if id_info['email'] != self._oauth_user_email:
             raise_or_log_message(
                 f'Invalid credential owner email address (expected "{self._oauth_user_email}", '
-                f'got "{id_info['email']}")'
+                f'got "{id_info["email"]}")'
             )
             return False
 

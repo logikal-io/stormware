@@ -191,6 +191,6 @@ class Spreadsheet(Connector, ClientManager[Any]):
                     'startColumnIndex': start_column, 'endColumnIndex': end_column,
                 },
                 'cell': {'userEnteredFormat': user_entered_format},
-                'fields': f'userEnteredFormat({','.join(user_entered_format.keys())})',
+                'fields': f'userEnteredFormat({",".join(user_entered_format.keys())})',
             },
         }
