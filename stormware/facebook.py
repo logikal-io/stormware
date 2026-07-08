@@ -42,8 +42,10 @@ class FacebookAds:
         ``access_token`` keys. The app ID and app secret can be obtained by creating a Facebook App
         (under https://developers.facebook.com/apps/), after which we recommend creating a system
         user (under https://business.facebook.com/settings/system-users/), which can be then used
-        to generate an access token. Note that the system user must have access to the necessary ad
-        accounts and it must be also added to the appropriate app as an app tester.
+        to generate an access token. The access token must have ``ads_management`` permissions when
+        querying by account name, or ``ads_read`` when querying by account ID. Note that the system
+        user must have access to the necessary ad accounts and it must be also added to the
+        appropriate app as an app tester.
 
         """
         self.account_name = account_name
@@ -54,7 +56,9 @@ class FacebookAds:
         logger.info('Loading Facebook Ads accounts')
         user = BusinessUser(fbid='me', api=self.api)
         accounts = user.get_assigned_ad_accounts(fields=['id', 'name'])
-        self.ad_accounts: dict[str, str] = {account['name']: account['id'] for account in accounts}
+        self.ad_accounts: dict[str, str] = {
+            account['name']: account['id'] for account in accounts
+        }  #: Ad account name to ad account ID mapping.
 
     def account_id(self, account_name: str | None = None) -> str:
         """
@@ -75,16 +79,18 @@ class FacebookAds:
         Return a Facebook report.
 
         Args:
-            metrics: Numeric fields, see
-                https://developers.facebook.com/docs/marketing-api/insights/parameters#fields.
-            dimensions: Dimensional fields, see
-                https://developers.facebook.com/docs/marketing-api/insights/parameters#fields.
-            statistics: Ads action statistics fields, see
-                https://developers.facebook.com/docs/marketing-api/reference/ads-action-stats/.
-            parameters: Report parameters, see
-                https://developers.facebook.com/docs/marketing-api/insights/parameters#param.
+            metrics: Numeric fields to query.
+            dimensions: Dimensional fields to query.
+            statistics: Ads action statistics fields to query.
+            parameters: Report parameters to query.
             account_name: The ad account name to use.
             account_id: The ad account to use. Takes precedence over the ``account_name`` argument.
+
+        The available fields can be found in the `Marketing API ad account insights documentation
+        <https://developers.facebook.com/documentation/ads-commerce/marketing-api/reference/
+        ad-account/insights>`_, in particular, the ``Fields`` and ``Parameters`` sections. The
+        available ads action statistics can be found in the `Ads Action Stats documentation
+        <https://developers.facebook.com/docs/marketing-api/reference/ads-action-stats>`_.
 
         """
         dimensions = dimensions or []
