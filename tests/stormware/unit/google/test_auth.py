@@ -76,7 +76,7 @@ def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
 
 
 def test_credentials_permission_error(mocker: MockerFixture, tmp_path: Path) -> None:
-    tool_config = mocker.patch('stormware.google.auth.tool_config', return_value={})
+    mocker.patch('stormware.google.auth.tool_config', return_value={})
     mocker.patch('stormware.google.auth.xdg_config_home', return_value=tmp_path)
 
     # Credentials mocks
@@ -88,7 +88,7 @@ def test_credentials_permission_error(mocker: MockerFixture, tmp_path: Path) -> 
     credentials_path.write_text('{}')
 
     # Permission error
-    user_info = mocker.patch(
+    mocker.patch(
         'stormware.google.auth.OAuth2Credentials.from_authorized_user_info',
         side_effect=PermissionError,
     )
