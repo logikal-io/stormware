@@ -352,7 +352,12 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         # Load organization credentials
         if path := config.credentials_path:
             logger.debug(f'Loading organization credentials from file "{path}"')
-            return GCPAuth._credentials_from_info_json(info_json=path.read_text(), config=config)
+            try:
+                return GCPAuth._credentials_from_info_json(
+                    info_json=path.read_text(), config=config,
+                )
+            except PermissionError:
+                logger.debug('Cannot access file, skipping')
 
         # Load application default credentials
         logger.debug('Loading application default credentials')

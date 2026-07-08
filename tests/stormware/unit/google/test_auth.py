@@ -75,6 +75,27 @@ def test_credentials(mocker: MockerFixture, tmp_path: Path) -> None:
     assert auth.credentials(organization='non-existent') == impersonated_credentials
 
 
+def test_credentials_permission_error(mocker: MockerFixture, tmp_path: Path) -> None:
+    tool_config = mocker.patch('stormware.google.auth.tool_config', return_value={})
+    mocker.patch('stormware.google.auth.xdg_config_home', return_value=tmp_path)
+
+    # Credentials mocks
+    default_credentials = mocker.Mock(name='default_credentials')
+    mocker.patch('stormware.google.auth.default', return_value=(default_credentials, None))
+
+    credentials_path = tmp_path / 'gcloud/credentials/example-org.json'
+    credentials_path.parent.mkdir(parents=True, exist_ok=True)
+    credentials_path.write_text('{}')
+
+    # Permission error
+    user_info = mocker.patch(
+        'stormware.google.auth.OAuth2Credentials.from_authorized_user_info',
+        side_effect=PermissionError,
+    )
+    auth = GCPAuth()
+    assert auth.credentials(organization='example.org') == default_credentials
+
+
 def test_oauth_credentials(  # pylint: disable=too-many-statements
     mocker: MockerFixture, tmp_path: Path,
 ) -> None:
