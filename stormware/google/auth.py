@@ -111,7 +111,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
             'oauth_client_secrets_key', GCPAuth.DEFAULT_OAUTH_CLIENT_SECRETS_KEY,
         )
 
-        self._local_config = xdg_config_home() / f'stormware/{project_name()}/google'
+        self._local_config = xdg_config_home() / f'stormware/{self.project()}/google'
         self._gcloud_config = xdg_config_home() / 'gcloud'
         self._credentials: dict[Config, Credentials] = {}
 
