@@ -34,6 +34,7 @@ dependencies = {file = 'requirements/core.txt'}
 google = {file = 'requirements/extras/google.txt'}
 amazon = {file = 'requirements/extras/amazon.txt'}
 facebook = {file = 'requirements/extras/facebook.txt'}
+microsoft = {file = 'requirements/extras/microsoft.txt'}
 
 [tool.setuptools]
 packages = ['stormware', 'stormware.amazon', 'stormware.google']

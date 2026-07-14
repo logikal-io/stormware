@@ -15,6 +15,7 @@ extras:
 - amazon
 - google
 - facebook
+- microsoft
 jupyter: true
 keywords:
 - api
