@@ -25,8 +25,8 @@ def test_report() -> None:
             FROM campaign
             WHERE segments.date DURING LAST_7_DAYS
         """)
-        expected = pandas.DataFrame()
-        assert_frame_equal(report, expected)
+    expected = pandas.DataFrame()
+    assert_frame_equal(report, expected)
 
 
 @mark.xfail(True, reason='developer token is not valid yet')
