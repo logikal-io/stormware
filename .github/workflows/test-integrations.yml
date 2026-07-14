@@ -1,7 +1,7 @@
 name: Test integrations
 on:
   schedule:
-    - cron: '8 10 * * *'  # 10:08 UTC
+    - cron: '8 4 * * *'  # 04:08 UTC
 
 jobs:
   run-python-tests:
