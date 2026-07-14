@@ -72,6 +72,10 @@ Google Sheets
 ~~~~~~~~~~~~~
 .. autoclass:: stormware.google.sheets.Spreadsheet
 
+Google Search Console
+~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: stormware.google.search_console.SearchConsole
+
 Gmail
 ~~~~~
 .. automodule:: stormware.google.gmail
