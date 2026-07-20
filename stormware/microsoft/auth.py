@@ -23,31 +23,43 @@ from stormware.secrets import SecretStore, default_secret_store
 logger = getLogger(__name__)
 
 
-class OAuthCallbackHandler(BaseHTTPRequestHandler):
-    def do_GET(self) -> None:
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write(b"""
-          <html>
-            <head><title>Authentication Successful</title></head>
-            <body>
-              <h1>Authentication Successful</h1>
-              <p>You may close this window now.</p>
-            </body>
-          </html>
-        """)
-        self.server.response_uri = f'http://localhost:{self.server.server_port}{self.path}'
+class OAuthServer(HTTPServer):
+    def __init__(self, port: int):
+        self.response_uri: str | None = None
+
+        class OAuthHandler(BaseHTTPRequestHandler):
+            def do_GET(handler) -> None:  # pylint: disable=invalid-name, no-self-argument
+                handler.send_response(200)
+                handler.send_header('Content-type', 'text/html')
+                handler.end_headers()
+                handler.wfile.write(b"""
+                  <html>
+                    <head><title>Authentication Successful</title></head>
+                    <body>
+                      <h1>Authentication Successful</h1>
+                      <p>You may close this window.</p>
+                    </body>
+                  </html>
+                """)
+                self.response_uri = f'http://localhost:{self.server_port}{handler.path}'
+
+        super().__init__(('localhost', port), RequestHandlerClass=OAuthHandler)
+
+    def wait_for_callback(self) -> str:
+        # Process requests until the authorization code is captured
+        while not self.response_uri:  # pylint: disable=while-used
+            self.handle_request()
+        return self.response_uri
 
 
-class MicrosoftAuth(ProjectAuth):
+class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attributes
     REDIRECT_URI = 'http://localhost:42942'
 
-    DEFAULT_DEVELOPER_TOKEN_KEY = 'stormware-microsoft-developer-token'
+    DEFAULT_DEVELOPER_TOKEN_KEY = 'stormware-microsoft-developer-token'  # nosec: only key path
     DEFAULT_OAUTH_CREDENTIALS_KEY = 'stormware-microsoft-oauth-credentials'
     DEFAULT_OAUTH_CLIENT_SECRETS_KEY = 'stormware-microsoft-oauth-client-secrets'
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         *,
         organization: str | None = None,
@@ -112,6 +124,7 @@ class MicrosoftAuth(ProjectAuth):
         self._environment = environment
 
         self._local_config = xdg_config_home() / f'stormware/{self.project()}/microsoft'
+        self._auth: OAuthWebAuthCodeGrant | None = None
         self._authorization_data: AuthorizationData | None = None
 
         # Load secrets
@@ -163,18 +176,14 @@ class MicrosoftAuth(ProjectAuth):
                 )
 
             logger.debug('Initiating OAuth 2.0 flow')
-            auth = self._authorization_data.authentication
-            auth_url = auth.get_authorization_endpoint()
+            auth_url = self._auth.get_authorization_endpoint()
 
             port = urlparse(self.REDIRECT_URI).port
             logger.debug(f'Starting local server on port "{port}"')
-            with HTTPServer(('localhost', port), OAuthCallbackHandler) as server:
-                server.response_uri = None  # type: ignore[attr-defined]
-                print(f'Your browser has been opened to visit:\n\n{auth_url}')
+            with OAuthServer(port) as server:
+                print(f'\nYour browser has been opened to visit:\n\n{auth_url}\n')
                 webbrowser.open(auth_url)
-                while not server.response_uri:  # type: ignore[attr-defined]
-                    server.handle_request()
-                response_uri = server.response_uri  # type: ignore[attr-defined]
+                response_uri = server.wait_for_callback()
 
             logger.debug('Requesting refresh token')
             self._auth.request_oauth_tokens_by_response_uri(response_uri)
@@ -202,17 +211,17 @@ class MicrosoftAuth(ProjectAuth):
             logger.debug('Using cached authorization data')
             return self._authorization_data
 
+        self._auth = OAuthWebAuthCodeGrant(
+            client_id=self.client_secrets['client_id'],
+            client_secret=self.client_secrets['client_secret'],
+            redirection_uri=self.REDIRECT_URI,
+            env=self._environment,
+            tenant=self.client_secrets.get('tenant'),
+        )
         self._authorization_data = AuthorizationData(
             developer_token=self.developer_token,
-            authentication=OAuthWebAuthCodeGrant(
-                client_id=self.client_secrets['client_id'],
-                client_secret=self.client_secrets['client_secret'],
-                redirection_uri=self.REDIRECT_URI,
-                env=self._environment,
-                tenant=self.client_secrets.get('tenant'),
-            ),
+            authentication=self._auth,
         )
-        self._auth = self._authorization_data.authentication
 
         # Get OAuth tokens
         oauth_credentials = self._get_oauth_credentials()
