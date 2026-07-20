@@ -7,9 +7,11 @@ Microsoft Advertising authentication.
 import json
 import sys
 import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from logging import getLogger
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from bingads.authorization import AuthorizationData, OAuthWebAuthCodeGrant
 from logikal_utils.project import tool_config
@@ -19,6 +21,23 @@ from stormware.auth import ProjectAuth
 from stormware.secrets import SecretStore, default_secret_store
 
 logger = getLogger(__name__)
+
+
+class OAuthCallbackHandler(BaseHTTPRequestHandler):
+    def do_GET(self) -> None:
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"""
+          <html>
+            <head><title>Authentication Successful</title></head>
+            <body>
+              <h1>Authentication Successful</h1>
+              <p>You may close this window now.</p>
+            </body>
+          </html>
+        """)
+        self.server.response_uri = f'http://localhost:{self.server.server_port}{self.path}'
 
 
 class MicrosoftAuth(ProjectAuth):
@@ -146,11 +165,18 @@ class MicrosoftAuth(ProjectAuth):
             logger.debug('Initiating OAuth 2.0 flow')
             auth = self._authorization_data.authentication
             auth_url = auth.get_authorization_endpoint()
-            # TODO: start server and wait for callback
-            print(f'Your browser has been opened to visit:\n\n{auth_url}')
-            webbrowser.open(auth_url)
 
-            # TODO: use a different method?
+            port = urlparse(self.REDIRECT_URI).port
+            logger.debug(f'Starting local server on port "{port}"')
+            with HTTPServer(('localhost', port), OAuthCallbackHandler) as server:
+                server.response_uri = None  # type: ignore[attr-defined]
+                print(f'Your browser has been opened to visit:\n\n{auth_url}')
+                webbrowser.open(auth_url)
+                while not server.response_uri:  # type: ignore[attr-defined]
+                    server.handle_request()
+                response_uri = server.response_uri  # type: ignore[attr-defined]
+
+            logger.debug('Requesting refresh token')
             self._auth.request_oauth_tokens_by_response_uri(response_uri)
             credentials = {'refresh_token': self._auth.oauth_tokens.refresh_token}
             credentials_string = json.dumps(credentials)

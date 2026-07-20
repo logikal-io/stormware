@@ -65,6 +65,8 @@ filterwarnings = [
   # Note: not sure where are these coming from, can't reproduce locally
   'ignore:unclosed.*[Ss]ocket.*:ResourceWarning',
   'ignore:.*get_validators.*is deprecated.*:pydantic.warnings.PydanticDeprecatedSince20',
+  # See https://github.com/BingAds/BingAds-Python-SDK/issues/340
+  'ignore:datetime.datetime.utcnow\(\) is deprecated.*:DeprecationWarning',
 ]
 
 [tool.coverage.report]
