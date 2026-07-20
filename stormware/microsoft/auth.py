@@ -6,6 +6,7 @@ Microsoft Advertising authentication.
 # - https://learn.microsoft.com/en-us/advertising/guides/sdk-authentication
 import json
 import sys
+import webbrowser
 from logging import getLogger
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,8 @@ logger = getLogger(__name__)
 
 
 class MicrosoftAuth(ProjectAuth):
+    REDIRECT_URI = 'http://localhost:42942'
+
     DEFAULT_DEVELOPER_TOKEN_KEY = 'stormware-microsoft-developer-token'
     DEFAULT_OAUTH_CREDENTIALS_KEY = 'stormware-microsoft-oauth-credentials'
     DEFAULT_OAUTH_CLIENT_SECRETS_KEY = 'stormware-microsoft-oauth-client-secrets'
@@ -69,10 +72,11 @@ class MicrosoftAuth(ProjectAuth):
         secret must be a string-encoded JSON object with the ``client_id``, ``client_secret`` and
         ``tenant`` keys. The client ID, client secret and tenant can be obtained by creating a
         Microsoft Azure web app (under
-        https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade. The
-        client ID is the value found in the "Overview" section under "Application (client) ID", and
-        the tenant is the value found under "Directory (tenant) ID". The client secret can be
-        generated in the "Certificates & secrets" section.
+        https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade with a
+        redirect URI of "http://localhost:42942"). The client ID is the value found in the
+        "Overview" section under "Application (client) ID", and the tenant is the value found under
+        "Directory (tenant) ID". The client secret can be generated in the "Certificates & secrets"
+        section.
 
         The developer token is loaded from the secret store using the provided key. It can be
         obtained under "Settings > Developer settings" in Microsoft Advertising (at
@@ -142,8 +146,11 @@ class MicrosoftAuth(ProjectAuth):
             logger.debug('Initiating OAuth 2.0 flow')
             auth = self._authorization_data.authentication
             auth_url = auth.get_authorization_endpoint()
+            # TODO: start server and wait for callback
             print(f'Your browser has been opened to visit:\n\n{auth_url}')
+            webbrowser.open(auth_url)
 
+            # TODO: use a different method?
             self._auth.request_oauth_tokens_by_response_uri(response_uri)
             credentials = {'refresh_token': self._auth.oauth_tokens.refresh_token}
             credentials_string = json.dumps(credentials)
@@ -174,7 +181,7 @@ class MicrosoftAuth(ProjectAuth):
             authentication=OAuthWebAuthCodeGrant(
                 client_id=self.client_secrets['client_id'],
                 client_secret=self.client_secrets['client_secret'],
-                redirection_uri='http://localhost:8000',
+                redirection_uri=self.REDIRECT_URI,
                 env=self._environment,
                 tenant=self.client_secrets.get('tenant'),
             ),
