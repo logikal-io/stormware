@@ -37,7 +37,7 @@ facebook = {file = 'requirements/extras/facebook.txt'}
 microsoft = {file = 'requirements/extras/microsoft.txt'}
 
 [tool.setuptools]
-packages = ['stormware', 'stormware.amazon', 'stormware.google']
+packages = ['stormware', 'stormware.amazon', 'stormware.google', 'stormware.microsoft']
 
 [tool.stormware]
 organization = 'logikal.io'
@@ -53,6 +53,7 @@ module = [
   'google.protobuf.*',
   'googleapiclient.*',
   'google_auth_oauthlib',
+  'bingads.*',
 ]
 
 [tool.pytest]
@@ -63,8 +64,7 @@ filterwarnings = [
   'error',
   # Note: not sure where are these coming from, can't reproduce locally
   'ignore:unclosed.*[Ss]ocket.*:ResourceWarning',
-  # Note: can be removed when https://pypi.org/project/db-dtypes/ v1.7.0+ is released
-  'ignore:.*unit for NumPy timedelta is deprecated.*:DeprecationWarning',
+  'ignore:.*get_validators.*is deprecated.*:pydantic.warnings.PydanticDeprecatedSince20',
 ]
 
 [tool.coverage.report]

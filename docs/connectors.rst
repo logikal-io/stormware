@@ -79,3 +79,19 @@ Google Search Console
 Gmail
 ~~~~~
 .. automodule:: stormware.google.gmail
+
+Microsoft
+---------
+You can install the Microsoft connectors through the ``microsoft`` extra:
+
+.. code-block:: shell
+
+    pip install stormware[microsoft]
+
+.. note::
+
+    All Microsoft connectors use the Microsoft credentials that are obtained through the
+    authentication mechanism described in the :ref:`auth:Microsoft` section of the authentication
+    documentation.
+
+.. autoclass:: stormware.microsoft.bing_ads.BingAds
