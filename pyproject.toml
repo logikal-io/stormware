@@ -54,6 +54,7 @@ module = [
   'googleapiclient.*',
   'google_auth_oauthlib',
   'bingads.*',
+  'openapi_client.*',
 ]
 
 [tool.pytest]
@@ -64,7 +65,9 @@ filterwarnings = [
   'error',
   # Note: not sure where are these coming from, can't reproduce locally
   'ignore:unclosed.*[Ss]ocket.*:ResourceWarning',
+  # These are produced by Bing Ads Python SDK, not sure exacly why
   'ignore:.*get_validators.*is deprecated.*:pydantic.warnings.PydanticDeprecatedSince20',
+  'ignore:.*model_fields.*is deprecated.*:pydantic.warnings.PydanticDeprecatedSince211',
   # See https://github.com/BingAds/BingAds-Python-SDK/issues/340
   'ignore:datetime.datetime.utcnow\(\) is deprecated.*:DeprecationWarning',
 ]

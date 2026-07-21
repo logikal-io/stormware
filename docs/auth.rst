@@ -57,9 +57,8 @@ profile then the ``boto3`` :ref:`credential location mechanism <boto3:guide_cred
 
 Microsoft
 ---------
-The authentication logic is implemented in :class:`~stormware.microsoft.auth.MicrosoftAuth`.
-It retrieves the OAuth 2.0 client ID and client secret from the secret store and manages the
-authorization flow to obtain and refresh the access token.
+The authentication logic is implemented in :class:`~stormware.microsoft.auth.MicrosoftAuth`. The
+exact details can be found in the class documentation.
 
 Secret Store
 ------------

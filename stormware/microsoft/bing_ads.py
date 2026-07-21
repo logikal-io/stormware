@@ -4,55 +4,72 @@ Bing Ads API connector.
 # Documentation:
 # - Bing Ads Python SDK: https://learn.microsoft.com/en-us/advertising/guides/get-started-python
 # - Changelog: https://learn.microsoft.com/en-us/advertising/guides/release-notes
-import tempfile
+from datetime import datetime
 from logging import getLogger
 
 import pandas as pd
 from bingads.service_client import ServiceClient
 from bingads.v13.reporting import (
-    AccountThroughCampaignReportScope, CampaignPerformanceReportRequest, ReportAggregation,
-    ReportFormat, ReportingDownloadParameters, ReportingServiceManager, ReportTime,
-    ReportTimePeriod,
+    ReportFormat, ReportingDownloadParameters, ReportingServiceManager,
 )
+from logikal_utils.path import tmp_path
+from openapi_client.models.customer.advertiser_account import AdvertiserAccount
+from openapi_client.models.customer.get_user_request import GetUserRequest
+from openapi_client.models.customer.paging import Paging
+from openapi_client.models.customer.predicate import Predicate
+from openapi_client.models.customer.predicate_operator import PredicateOperator
+from openapi_client.models.customer.search_accounts_request import SearchAccountsRequest
+from openapi_client.models.reporting.report_request import ReportRequest
 
-from stormware.microsoft_auth import MicrosoftAuth
+from stormware.microsoft.auth import MicrosoftAuth
 
 logger = getLogger(__name__)
 
 
 class BingAds:
-    def __init__(
-        self,
-        account_name: str | None = None,
-        auth: MicrosoftAuth | None = None,
-        environment: str = 'production',
-    ):
+    VERSION = 13
+
+    def __init__(self, account_name: str | None = None, auth: MicrosoftAuth | None = None):
         """
         Bing Ads connector.
 
         Args:
             account_name: The name of the ad account to use.
-            auth: The Microsoft Advertising authentication manager to use.
-            environment: The environment to use.
+            auth: The Microsoft authentication manager to use.
 
         """
         self.account_name = account_name
-        self.environment = environment
-        self.auth = auth or MicrosoftAuth(environment=environment)
+        self.auth = auth or MicrosoftAuth()
         self.authorization_data = self.auth.authorization_data()
 
+        self.ad_accounts: dict[str, AdvertiserAccount] = {
+            account.name: account for account in self._ad_accounts()
+        }  #: Ad account name to ad account mapping.
+
+    def _ad_accounts(self) -> list[AdvertiserAccount]:
         logger.info('Loading Bing Ads accounts')
         customer_service = ServiceClient(
             service='CustomerManagementService',
-            version=13,
+            version=self.VERSION,
             authorization_data=self.authorization_data,
-            environment=self.environment,
+            environment=self.auth.environment,
         )
-        response = customer_service.GetAccountsInfoByUser(UserId=None)
-        self.ad_accounts: dict[str, str] = {
-            account.AccountName: str(account.Id)
-            for account in response.AccountsInfo.AccountInfo
-        }
+        user = customer_service.get_user(GetUserRequest()).user
+
+        accounts = []
+        page_index = 0
+        page_size = 100
+        while True:  # pylint: disable=while-used
+            response = customer_service.search_accounts(SearchAccountsRequest(
+                page_info=Paging(index=page_index, size=page_size),
+                predicates=[
+                    Predicate(field='UserId', operator=PredicateOperator.EQUALS, value=user.id),
+                ],
+            ))
+            if response.accounts:
+                accounts.extend(response.accounts)
+            if not response.accounts or len(response.accounts) < page_size:
+                return accounts
 
     def account_id(self, account_name: str | None = None) -> str:
         """
@@ -62,63 +79,41 @@ class BingAds:
             raise ValueError('You must specify the account')
         if account_name not in self.ad_accounts:
             raise RuntimeError(f"Account '{account_name}' not found in your accounts")
-        return self.ad_accounts[account_name]
+        return self.ad_accounts[account_name].id  # type: ignore[no-any-return]
 
-    def properties(self) -> list[str]:
-        """
-        Return a list of available account names.
-        """
-        return list(self.ad_accounts.keys())
-
-    def report(  # pylint: disable=too-many-arguments
-        self,
-        metrics: list[str],
-        dimensions: list[str] | None = None,
-        account_name: str | None = None,
-        account_id: str | None = None,
-        aggregation: str = 'Daily',
-        time_type: str = 'Yesterday',
-    ) -> pd.DataFrame:
+    def report(self, request: ReportRequest) -> pd.DataFrame:
         """
         Return a Bing Ads report.
 
         Args:
-            metrics: The metrics to include.
-            dimensions: The dimensions to include.
-            account_name: The account name to use.
-            account_id: The account ID to use. Takes precedence over account_name.
-            aggregation: The aggregation type.
-            time_type: The time period.
+            request: The report to request. For the available report request objects see `the
+                documentation <https://learn.microsoft.com/en-us/advertising/reporting-service/
+                reporting-data-objects>`_.
 
         """
-        account_id = account_id or self.account_id(account_name)
-        self.authorization_data.account_id = account_id
-
-        logger.info(f'Loading Bing Ads report for account {account_id}')
-        reporting_service_manager = ReportingServiceManager(
+        logger.info('Loading Bing Ads report')
+        service_manager = ReportingServiceManager(
             authorization_data=self.authorization_data,
-            poll_interval_in_milliseconds=5000,
-            environment=self.environment,
+            environment=self.auth.environment,
         )
 
-        report_request = CampaignPerformanceReportRequest(
-            Format=ReportFormat.CSV,
-            ReportName='Stormware Report',
-            Aggregation=getattr(ReportAggregation, aggregation.upper()),
-            Scope=AccountThroughCampaignReportScope(AccountIds=[str(account_id)]),
-            Time=ReportTime(PredefinedTime=getattr(ReportTimePeriod, time_type.upper())),
-            Columns=(dimensions or []) + metrics,
-        )
+        logger.debug('Downloading report CSV')
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%s")
+        request.report_name = f'Bing Ads API {timestamp}'
+        request.format = ReportFormat.CSV
+        request.format_version = '2.0'
+        request.exclude_report_header = True
+        request.exclude_report_footer = True
+        file_path = service_manager.download_file(ReportingDownloadParameters(
+            report_request=request,
+            result_file_directory=str(tmp_path('stormware', suffix='bing_ads')),
+            result_file_name=f'report-{timestamp}.csv',
+            overwrite_result_file=False,
+            timeout_in_milliseconds=5 * 60 * 1000,  # 5 minutes
+        ))
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            download_parameters = ReportingDownloadParameters(
-                report_request=report_request,
-                result_file_directory=temp_dir,
-                result_file_name='report.csv',
-                overwrite_result_file=True,
-            )
-            file_path = reporting_service_manager.download_file(download_parameters)
-            # Bing CSVs usually have header info in the first few lines and a summary at the end
-            data = pd.read_csv(file_path, skiprows=9, skipfooter=1, engine='python')
-
+        logger.debug('Parsing report CSV')
+        if not file_path:
+            return pd.DataFrame()
+        data = pd.read_csv(file_path)
         return data.convert_dtypes()

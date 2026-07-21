@@ -121,7 +121,7 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
         self._oauth_credentials_key = oauth_credentials_key or self._config.get(
             'oauth_credentials_key', MicrosoftAuth.DEFAULT_OAUTH_CREDENTIALS_KEY,
         )
-        self._environment = environment
+        self.environment = environment
 
         self._local_config = xdg_config_home() / f'stormware/{self.project()}/microsoft'
         self._auth: OAuthWebAuthCodeGrant | None = None
@@ -215,7 +215,7 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
             client_id=self.client_secrets['client_id'],
             client_secret=self.client_secrets['client_secret'],
             redirection_uri=self.REDIRECT_URI,
-            env=self._environment,
+            env=self.environment,
             tenant=self.client_secrets.get('tenant'),
         )
         self._authorization_data = AuthorizationData(

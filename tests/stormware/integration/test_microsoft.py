@@ -1,31 +1,43 @@
-# import pandas as pd
-# from pytest import mark
+import pandas
+from bingads.v13.reporting import (
+    AccountThroughCampaignReportScope, CampaignPerformanceReportRequest, Date, ReportTime,
+)
+from pandas.testing import assert_frame_equal
+from stormware.microsoft.bing_ads import BingAds
 
-from stormware.microsoft.auth import MicrosoftAuth
-
-ACCOUNT_NAME = 'Stormware Test'
-
-
-def test_auth() -> None:
-    MicrosoftAuth().authorization_data()
+ACCOUNT_NAME = 'Logikal GmbH'
 
 
-# @mark.xfail(True, reason='credentials are not available')
-# def test_properties() -> None:
-#     bing = BingAds()
-#     properties = bing.properties()
-#     assert isinstance(properties, list)
+def test_report() -> None:
+    columns = ['CampaignName', 'Spend', 'Impressions', 'Clicks']
+    bing_ads = BingAds(account_name=ACCOUNT_NAME)
+    report = bing_ads.report(CampaignPerformanceReportRequest(
+        aggregation='Daily',  # TODO: not picked up?
+        columns=columns,
+        scope=AccountThroughCampaignReportScope(account_ids=[bing_ads.account_id()]),
+        time=ReportTime(
+            CustomDateRangeStart=Date(year=2026, month=7, day=17),
+            CustomDateRangeEnd=Date(year=2026, month=7, day=20),
+            ReportTimeZone='AmsterdamBerlinBernRomeStockholmVienna',
+        ),
+    ))[columns]
+    expected = pandas.DataFrame({
+        'CampaignName': ['MindLab'],
+        'Spend': [21.21],
+        'Impressions': [9182],
+        'Clicks': [49],
+    }).convert_dtypes()
+    assert_frame_equal(report, expected)
 
 
-# @mark.xfail(True, reason='credentials are not available')
-# def test_report() -> None:
-#     bing = BingAds(account_name=ACCOUNT_NAME)
-#     report = bing.report(
-#         metrics=['Impressions', 'Clicks', 'Spend'],
-#         dimensions=['CampaignName'],
-#     )
-#     assert isinstance(report, pd.DataFrame)
-#     if not report.empty:
-#         assert 'Impressions' in report.columns
-#         assert 'Clicks' in report.columns
-#         assert 'CampaignName' in report.columns
+def test_empty_report() -> None:
+    bing_ads = BingAds(account_name=ACCOUNT_NAME)
+    report = bing_ads.report(CampaignPerformanceReportRequest(
+        columns=['CampaignName', 'Spend'],
+        scope=AccountThroughCampaignReportScope(account_ids=[bing_ads.account_id()]),
+        time=ReportTime(
+            CustomDateRangeStart=Date(year=2026, month=7, day=1),
+            CustomDateRangeEnd=Date(year=2026, month=7, day=5),
+        ),
+    ))
+    assert_frame_equal(report, pandas.DataFrame())
