@@ -56,16 +56,18 @@ class BingAds:
         )
         user = customer_service.get_user(GetUserRequest()).user
 
+        # For paging see:
+        # https://learn.microsoft.com/en-us/advertising/customer-management-service/paging
         accounts = []
         page_index = 0
-        page_size = 100
+        page_size = 1000  # maximum size for SearchAccounts
+        predicate = Predicate(field='UserId', operator=PredicateOperator.EQUALS, value=user.id)
         while True:  # pylint: disable=while-used
             response = customer_service.search_accounts(SearchAccountsRequest(
                 page_info=Paging(index=page_index, size=page_size),
-                predicates=[
-                    Predicate(field='UserId', operator=PredicateOperator.EQUALS, value=user.id),
-                ],
+                predicates=[predicate],
             ))
+            page_index += 1
             if response.accounts:
                 accounts.extend(response.accounts)
             if not response.accounts or len(response.accounts) < page_size:
