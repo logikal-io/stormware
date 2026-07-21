@@ -151,6 +151,11 @@ resource "aws_secretsmanager_secret" "test" {
   recovery_window_in_days = 0
 }
 
+resource "aws_secretsmanager_secret" "test_empty" {
+  name = "stormware-test-empty"
+  recovery_window_in_days = 0
+}
+
 resource "google_bigquery_dataset" "test" {
   dataset_id = "test"
   description = "Tables used for testing"
