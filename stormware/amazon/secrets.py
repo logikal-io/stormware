@@ -34,8 +34,8 @@ class SecretsManager(SecretStore):
         """
         logger.debug(f'Loading secret "{key}"')
         response = self._client.get_secret_value(SecretId=key)
-        if 'SecretString' not in response:
-            raise KeyError(f'Secret "{key}" has no secret value set')
+        if 'SecretString' not in response:  # pragma: no cover, defensive line
+            raise RuntimeError(f'Secret "{key}" has no secret value set')
         return response['SecretString']  # type: ignore[no-any-return]
 
     def __setitem__(self, key: str, value: str) -> None:
@@ -69,14 +69,17 @@ class SecretsManager(SecretStore):
         except ClientError as error:
             if error.response.get('Error', {}).get('Code') == 'AccessDeniedException':
                 return False
-            raise  # pragma: no cover, defensive
+            raise  # pragma: no cover, defensive line
 
     def get(self, key: str, default: str | None = None) -> str | None:
         try:
             return self[key]
-        except (KeyError, self._client.exceptions.ResourceNotFoundException):  # pragma: no cover
+        except (
+            RuntimeError,
+            self._client.exceptions.ResourceNotFoundException,
+        ):  # pragma: no cover
             return default
         except ClientError as error:
             if error.response.get('Error', {}).get('Code') == 'AccessDeniedException':
                 return default
-            raise  # pragma: no cover, defensive
+            raise  # pragma: no cover, defensive line
