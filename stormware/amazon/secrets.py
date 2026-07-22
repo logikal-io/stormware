@@ -5,6 +5,8 @@ Amazon Web Services Secrets Manager interface.
 # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html
 from logging import getLogger
 
+from botocore.exceptions import ClientError
+
 from stormware.amazon.auth import AWSAuth
 from stormware.secrets import SecretStore
 
@@ -62,11 +64,19 @@ class SecretsManager(SecretStore):
         try:
             self._client.describe_secret(SecretId=key)
             return True
-        except self._client.exceptions.ResourceNotFoundException:
+        except self._client.exceptions.ResourceNotFoundException:  # pragma: no cover
             return False
+        except ClientError as error:
+            if error.response.get('Error', {}).get('Code') == 'AccessDeniedException':
+                return False
+            raise  # pragma: no cover, defensive
 
     def get(self, key: str, default: str | None = None) -> str | None:
         try:
             return self[key]
-        except (KeyError, self._client.exceptions.ResourceNotFoundException):
+        except (KeyError, self._client.exceptions.ResourceNotFoundException):  # pragma: no cover
             return default
+        except ClientError as error:
+            if error.response.get('Error', {}).get('Code') == 'AccessDeniedException':
+                return default
+            raise  # pragma: no cover, defensive
