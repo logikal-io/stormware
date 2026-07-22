@@ -4,6 +4,7 @@ from bingads.v13.reporting import (
 )
 from pandas.testing import assert_frame_equal
 from pytest import raises
+
 from stormware.microsoft.bing_ads import BingAds
 
 ACCOUNT_NAME = 'Logikal GmbH'

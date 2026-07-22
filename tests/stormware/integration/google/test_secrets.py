@@ -2,7 +2,7 @@ from datetime import datetime
 
 from stormware.google.secrets import SecretManager
 
-SECRET_KEY = 'stormware-test'
+SECRET_KEY = 'stormware-test'  # nosec: only used for testing
 SECRET_KEY_EMPTY = f'{SECRET_KEY}-empty'
 SECRET_KEY_DISABLED = f'{SECRET_KEY}-disabled'
 SECRET_KEY_DESTROYED = f'{SECRET_KEY}-destroyed'

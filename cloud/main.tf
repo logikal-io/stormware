@@ -282,8 +282,17 @@ data "aws_iam_policy_document" "test_secret_access" {
   version = "2012-10-17"
 
   statement {
-    actions = ["secretsmanager:PutSecretValue", "secretsmanager:GetSecretValue"]
+    actions = [
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:PutSecretValue",
+      "secretsmanager:GetSecretValue",
+    ]
     resources = [aws_secretsmanager_secret.test.arn]
+  }
+
+  statement {
+    actions = ["secretsmanager:DescribeSecret", "secretsmanager:GetSecretValue"]
+    resources = [aws_secretsmanager_secret.test_empty.arn]
   }
 }
 

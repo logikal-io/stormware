@@ -4,7 +4,7 @@ from pytest import mark
 
 from stormware.amazon.secrets import SecretsManager
 
-SECRET_KEY = 'stormware-test'
+SECRET_KEY = 'stormware-test'  # nosec: only used for testing
 SECRET_KEY_EMPTY = f'{SECRET_KEY}-empty'
 SECRET_KEY_NONEXISTENT = f'{SECRET_KEY}-non-existent'
 
