@@ -2,10 +2,10 @@ from datetime import datetime
 
 from stormware.google.secrets import SecretManager
 
-SECRET_KEY = 'stormware-test'  # nosec: only used for testing
-SECRET_KEY_EMPTY = 'stormware-test-empty'  # nosec: only used for testing
-SECRET_KEY_DISABLED = 'stormware-test-disabled'  # nosec: only used for testing
-SECRET_KEY_DESTROYED = 'stormware-test-destroyed'  # nosec: only used for testing
+SECRET_KEY = 'stormware-test'
+SECRET_KEY_EMPTY = f'{SECRET_KEY}-empty'
+SECRET_KEY_DISABLED = f'{SECRET_KEY}-disabled'
+SECRET_KEY_DESTROYED = f'{SECRET_KEY}-destroyed'
 SECRET_KEY_NONEXISTENT = f'{SECRET_KEY}-non-existent'
 
 EMPTY_KEYS = [
@@ -18,7 +18,7 @@ EMPTY_KEYS = [
 
 def test_get_set() -> None:
     timestamp = datetime.now().strftime('%Y%m%d-%H%M%s')
-    secret_value = f'test-{timestamp}'  # nosec: only used for testing
+    secret_value = f'test-{timestamp}'
 
     with SecretManager() as secrets:
         # Set a new value

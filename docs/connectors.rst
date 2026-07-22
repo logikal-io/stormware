@@ -19,7 +19,7 @@ You can install the Amazon connectors through the ``amazon`` extra:
 AWS Secrets Manager
 ~~~~~~~~~~~~~~~~~~~
 .. autoclass:: stormware.amazon.secrets.SecretsManager
-    :special-members: __getitem__
+    :special-members: __getitem__, __setitem__, __contains__
 
 Facebook
 --------
@@ -66,7 +66,7 @@ Google Drive
 Google Secret Manager
 ~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: stormware.google.secrets.SecretManager
-    :special-members: __getitem__
+    :special-members: __getitem__, __setitem__, __contains__
 
 Google Sheets
 ~~~~~~~~~~~~~

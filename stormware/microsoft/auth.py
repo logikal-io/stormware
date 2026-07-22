@@ -11,7 +11,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from logging import getLogger
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
 
 from bingads.authorization import AuthorizationData, OAuthWebAuthCodeGrant
 from logikal_utils.project import tool_config
@@ -124,8 +123,6 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
         self.environment = environment
 
         self._local_config = xdg_config_home() / f'stormware/{self.project()}/microsoft'
-        self._auth: OAuthWebAuthCodeGrant | None = None
-        self._authorization_data: AuthorizationData | None = None
 
         # Load secrets
         developer_token_key = developer_token_key or self._config.get(
@@ -137,6 +134,20 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
         with default_secret_store(self._secret_store) as secrets:
             self.developer_token = secrets[developer_token_key]
             self.client_secrets = json.loads(secrets[oauth_client_secrets_key])
+
+        # Obtain credentials
+        self._auth = OAuthWebAuthCodeGrant(
+            client_id=self.client_secrets['client_id'],
+            client_secret=self.client_secrets['client_secret'],
+            redirection_uri=self.REDIRECT_URI,
+            env=self.environment,
+            tenant=self.client_secrets.get('tenant'),
+        )
+        self._authorization_data = AuthorizationData(
+            developer_token=self.developer_token,
+            authentication=self._auth,
+        )
+        self._oauth_credentials: dict[str, Any] | None = None
 
     def _get_stored_oauth_credentials(
         self,
@@ -178,7 +189,7 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
             logger.debug('Initiating OAuth 2.0 flow')
             auth_url = self._auth.get_authorization_endpoint()
 
-            port = urlparse(self.REDIRECT_URI).port
+            port = int(self.REDIRECT_URI.split(':')[1])
             logger.debug(f'Starting local server on port "{port}"')
             with OAuthServer(port) as server:
                 print(f'\nYour browser has been opened to visit:\n\n{auth_url}\n')
@@ -207,23 +218,10 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
         """
         Return the authorization data for the Microsoft Advertising SDK.
         """
-        if self._authorization_data:
-            logger.debug('Using cached authorization data')
-            return self._authorization_data
-
-        self._auth = OAuthWebAuthCodeGrant(
-            client_id=self.client_secrets['client_id'],
-            client_secret=self.client_secrets['client_secret'],
-            redirection_uri=self.REDIRECT_URI,
-            env=self.environment,
-            tenant=self.client_secrets.get('tenant'),
-        )
-        self._authorization_data = AuthorizationData(
-            developer_token=self.developer_token,
-            authentication=self._auth,
-        )
-
-        # Get OAuth tokens
-        oauth_credentials = self._get_oauth_credentials()
-        self._auth.request_oauth_tokens_by_refresh_token(oauth_credentials['refresh_token'])
+        if self._oauth_credentials:
+            logger.debug('Using cached credentials')
+        else:
+            self._oauth_credentials = self._get_oauth_credentials()
+            refresh_token = self._oauth_credentials['refresh_token']
+            self._auth.request_oauth_tokens_by_refresh_token(refresh_token)
         return self._authorization_data
