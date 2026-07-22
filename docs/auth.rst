@@ -55,6 +55,11 @@ profile then the ``boto3`` :ref:`credential location mechanism <boto3:guide_cred
     <https://github.com/logikal-io/ansible-public-playbooks/blob/main/roles/aws/files/bin/awsl>`_
     for generating named profile credentials.
 
+Microsoft
+---------
+The authentication logic is implemented in :class:`~stormware.microsoft.auth.MicrosoftAuth`. The
+exact details can be found in the class documentation.
+
 Secret Store
 ------------
 The credentials for most connectors are retrieved from a secret store, which has the following
@@ -82,3 +87,4 @@ Authentication Managers
 -----------------------
 .. autoclass:: stormware.google.auth.GCPAuth
 .. autoclass:: stormware.amazon.auth.AWSAuth
+.. autoclass:: stormware.microsoft.auth.MicrosoftAuth

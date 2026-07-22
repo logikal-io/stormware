@@ -2,8 +2,8 @@
 Google Cloud Platform authentication.
 """
 # Documentation:
-# https://google-auth.readthedocs.io/
-# https://google-auth-oauthlib.readthedocs.io/
+# - https://google-auth.readthedocs.io/
+# - https://google-auth-oauthlib.readthedocs.io/
 import json
 import sys
 from collections.abc import Iterable
@@ -19,10 +19,10 @@ from google.oauth2 import id_token
 from google.oauth2.credentials import Credentials as OAuth2Credentials
 from google_auth_oauthlib import get_user_credentials
 from logikal_utils.operators import unique
-from logikal_utils.project import project_name, tool_config
+from logikal_utils.project import tool_config
 from xdg_base_dirs import xdg_config_home
 
-from stormware.auth import Auth
+from stormware.auth import ProjectAuth
 from stormware.google.connector import Connector
 
 logger = getLogger(__name__)
@@ -41,7 +41,7 @@ class Config:
         return f'organization ID "{self.organization_id}" and project "{self.project}"'
 
 
-class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
+class GCPAuth(ProjectAuth):  # pylint: disable=too-many-instance-attributes
     OAUTH_USER_EMAIL_SCOPES = ('openid', 'https://www.googleapis.com/auth/userinfo.email')
     OAUTH_SCOPES: list[str] = []
 
@@ -93,8 +93,7 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
                 ``stormware-google-oauth-client-secrets`` if not set.
 
         """
-        super().__init__(organization=organization)
-        self._project = project
+        super().__init__(organization=organization, project=project)
         self._config = tool_config('stormware').get('google', {})
         self._service_account_email = (
             service_account_email or self._config.get('service_account_email')
@@ -137,30 +136,6 @@ class GCPAuth(Auth):  # pylint: disable=too-many-instance-attributes
         Clear the credentials cache.
         """
         self._credentials = {}
-
-    def project(self, project: str | None = None) -> str:
-        """
-        Return the project name.
-
-        Defaults to the ``project`` value set in ``pyproject.toml`` under the ``tool.stormware``
-        section or the ``name`` value set under the ``project`` section.
-        """
-        project = (
-            project or self._project
-            or tool_config('stormware').get('project')
-            or project_name(raise_error_on_missing=False)
-        )
-        if not project:
-            raise ValueError('You must provide a project')
-        return project
-
-    def project_id(self, organization: str | None = None, project: str | None = None) -> str:
-        """
-        Return the project ID.
-
-        The project ID is constructed as ``{project}-{organization_id}``.
-        """
-        return f'{self.project(project=project)}-{self.organization_id(organization)}'
 
     def credentials_path(self, organization: str | None = None) -> Path | None:
         """

@@ -19,7 +19,7 @@ You can install the Amazon connectors through the ``amazon`` extra:
 AWS Secrets Manager
 ~~~~~~~~~~~~~~~~~~~
 .. autoclass:: stormware.amazon.secrets.SecretsManager
-    :special-members: __getitem__
+    :special-members: __getitem__, __setitem__, __contains__
 
 Facebook
 --------
@@ -66,7 +66,7 @@ Google Drive
 Google Secret Manager
 ~~~~~~~~~~~~~~~~~~~~~
 .. autoclass:: stormware.google.secrets.SecretManager
-    :special-members: __getitem__
+    :special-members: __getitem__, __setitem__, __contains__
 
 Google Sheets
 ~~~~~~~~~~~~~
@@ -79,3 +79,19 @@ Google Search Console
 Gmail
 ~~~~~
 .. automodule:: stormware.google.gmail
+
+Microsoft
+---------
+You can install the Microsoft connectors through the ``microsoft`` extra:
+
+.. code-block:: shell
+
+    pip install stormware[microsoft]
+
+.. note::
+
+    All Microsoft connectors use the Microsoft credentials that are obtained through the
+    authentication mechanism described in the :ref:`auth:Microsoft` section of the authentication
+    documentation.
+
+.. autoclass:: stormware.microsoft.bing_ads.BingAds

@@ -34,9 +34,10 @@ dependencies = {file = 'requirements/core.txt'}
 google = {file = 'requirements/extras/google.txt'}
 amazon = {file = 'requirements/extras/amazon.txt'}
 facebook = {file = 'requirements/extras/facebook.txt'}
+microsoft = {file = 'requirements/extras/microsoft.txt'}
 
 [tool.setuptools]
-packages = ['stormware', 'stormware.amazon', 'stormware.google']
+packages = ['stormware', 'stormware.amazon', 'stormware.google', 'stormware.microsoft']
 
 [tool.stormware]
 organization = 'logikal.io'
@@ -52,6 +53,8 @@ module = [
   'google.protobuf.*',
   'googleapiclient.*',
   'google_auth_oauthlib',
+  'bingads.*',
+  'openapi_client.*',
 ]
 
 [tool.pytest]
@@ -62,8 +65,11 @@ filterwarnings = [
   'error',
   # Note: not sure where are these coming from, can't reproduce locally
   'ignore:unclosed.*[Ss]ocket.*:ResourceWarning',
-  # Note: can be removed when https://pypi.org/project/db-dtypes/ v1.7.0+ is released
-  'ignore:.*unit for NumPy timedelta is deprecated.*:DeprecationWarning',
+  # These are produced by Bing Ads Python SDK, not sure exacly why
+  'ignore:.*get_validators.*is deprecated.*:pydantic.warnings.PydanticDeprecatedSince20',
+  'ignore:.*model_fields.*is deprecated.*:pydantic.warnings.PydanticDeprecatedSince211',
+  # See https://github.com/BingAds/BingAds-Python-SDK/issues/340
+  'ignore:datetime.datetime.utcnow\(\) is deprecated.*:DeprecationWarning',
 ]
 
 [tool.coverage.report]

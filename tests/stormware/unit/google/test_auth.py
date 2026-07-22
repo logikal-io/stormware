@@ -1,7 +1,6 @@
 from logging import getLogger
 from pathlib import Path
 
-from logikal_utils.project import PYPROJECT
 from pytest import raises
 from pytest_mock import MockerFixture
 
@@ -9,21 +8,6 @@ from stormware.google.auth import GCPAuth
 from stormware.google.secrets import SecretManager
 
 logger = getLogger(__name__)
-
-
-def test_project() -> None:
-    assert GCPAuth().project() == 'stormware'
-    assert GCPAuth().project_id() == 'stormware-logikal-io'
-    assert GCPAuth(project='example').project() == 'example'
-    assert GCPAuth(project='example').project('test') == 'test'
-    assert GCPAuth().project('example') == 'example'
-
-
-def test_project_error(mocker: MockerFixture) -> None:
-    mocker.patch('stormware.google.auth.project_name', return_value=None)
-    mocker.patch.dict(PYPROJECT, {'tool': {'stormware': {'project': None}}})
-    with raises(ValueError, match='You must provide a project'):
-        GCPAuth().project()
 
 
 def test_register(mocker: MockerFixture) -> None:
