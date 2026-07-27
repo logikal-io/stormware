@@ -189,7 +189,7 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
             logger.debug('Initiating OAuth 2.0 flow')
             auth_url = self._auth.get_authorization_endpoint()
 
-            port = int(self.REDIRECT_URI.split(':')[1])
+            port = int(self.REDIRECT_URI.rsplit(':', 1)[1])
             logger.debug(f'Starting local server on port "{port}"')
             with OAuthServer(port) as server:
                 print(f'\nYour browser has been opened to visit:\n\n{auth_url}\n')

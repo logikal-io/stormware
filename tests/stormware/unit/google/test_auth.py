@@ -142,8 +142,8 @@ def test_oauth_credentials(  # pylint: disable=too-many-statements
     auth.clear_cache()
     del secrets[GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY]
     assert auth.credentials() == user_credentials
-    cache_file_name = f'stormware/stormware/google/{GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY}.json'
-    assert (tmp_path / cache_file_name).read_text() == user_credentials.to_json()
+    local_file_path = f'stormware/stormware/google/{GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY}.json'
+    assert (tmp_path / local_file_path).read_text() == user_credentials.to_json()
 
     logger.info('Testing interactive flow (any user, not cached, stored in local storage)')
     auth.clear_cache()
