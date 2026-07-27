@@ -27,3 +27,8 @@ intersphinx_mapping = {
         f'https://googleapis.dev/python/google-auth/{pkg_version("google-auth")}/', None,
     ),
 }
+nitpick_ignore = [
+    ('py:class', 'bingads.authorization.AuthorizationData'),
+    ('py:class', 'openapi_client.models.customer.advertiser_account.AdvertiserAccount'),
+    ('py:class', 'openapi_client.models.reporting.report_request.ReportRequest'),
+]

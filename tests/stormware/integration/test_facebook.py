@@ -8,6 +8,8 @@ from pytest import raises
 
 from stormware.facebook import FacebookAds
 
+ACCOUNT_NAME = 'Logikal'
+
 
 def test_report_errors() -> None:
     facebook = FacebookAds()
@@ -18,7 +20,7 @@ def test_report_errors() -> None:
 
 
 def test_report() -> None:
-    facebook = FacebookAds(account_name='Logikal')
+    facebook = FacebookAds(account_name=ACCOUNT_NAME)
     report = facebook.report(
         metrics=['spend', 'impressions', 'clicks'],
         dimensions=['campaign_name', 'ad_name'],
@@ -34,12 +36,12 @@ def test_report() -> None:
     expected = pandas.read_json(
         Path(__file__).parent / 'data/facebook_report.json',
         dtype={'date_start': 'datetime64[us]', 'date_stop': 'datetime64[us]'},
-    )
-    assert_frame_equal(report, expected.convert_dtypes())
+    ).convert_dtypes()
+    assert_frame_equal(report, expected)
 
 
 def test_empty_report() -> None:
-    facebook = FacebookAds(account_name='Logikal')
+    facebook = FacebookAds(account_name=ACCOUNT_NAME)
     report = facebook.report(
         metrics=['spend', 'impressions', 'clicks'],
         dimensions=['campaign_name', 'ad_name'],

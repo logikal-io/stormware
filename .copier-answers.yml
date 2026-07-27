@@ -12,9 +12,10 @@ classifiers:
 cloud: true
 description: API connectors for data analysis and task automation
 extras:
-- amazon
 - google
+- amazon
 - facebook
+- microsoft
 jupyter: true
 keywords:
 - api

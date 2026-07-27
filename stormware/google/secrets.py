@@ -49,6 +49,12 @@ class SecretManager(Connector, SecretStore, ClientManager[SecretManagerServiceCl
         client = SecretManagerServiceClient(credentials=self.auth.credentials())
         return client.__enter__()  # pylint: disable=unnecessary-dunder-call
 
+    def _secret_path(self, key: str) -> str:
+        return f'projects/{self._project_id}/secrets/{key}'
+
+    def _secret_version_path(self, key: str, version: str = 'latest') -> str:
+        return f'{self._secret_path(key)}/versions/{version}'
+
     @staticmethod
     def _checksum(data: bytes) -> int:
         checksum = google_crc32c.Checksum(data)  # type: ignore[no-untyped-call]
@@ -113,15 +119,6 @@ class SecretManager(Connector, SecretStore, ClientManager[SecretManagerServiceCl
             logger.debug('Destroying old versions')
             self._destroy_versions(name=name, skip_version_names=[latest_version.name])
 
-    def get(self, key: str, default: str | None = None) -> str | None:
-        """
-        Retrieve the secret under the given key if it exists and has an active version.
-        """
-        try:
-            return self[key]
-        except (PermissionDenied, FailedPrecondition, NotFound):
-            return default
-
     def __contains__(self, key: str) -> bool:
         """
         Check if the given secret exists.
@@ -135,8 +132,8 @@ class SecretManager(Connector, SecretStore, ClientManager[SecretManagerServiceCl
         except (PermissionDenied, FailedPrecondition, NotFound):
             return False
 
-    def _secret_path(self, key: str) -> str:
-        return f'projects/{self._project_id}/secrets/{key}'
-
-    def _secret_version_path(self, key: str, version: str = 'latest') -> str:
-        return f'{self._secret_path(key)}/versions/{version}'
+    def get(self, key: str, default: str | None = None) -> str | None:
+        try:
+            return self[key]
+        except (PermissionDenied, FailedPrecondition, NotFound):
+            return default

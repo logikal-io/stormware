@@ -1,7 +1,6 @@
 from logging import getLogger
 from pathlib import Path
 
-from logikal_utils.project import PYPROJECT
 from pytest import raises
 from pytest_mock import MockerFixture
 
@@ -9,21 +8,6 @@ from stormware.google.auth import GCPAuth
 from stormware.google.secrets import SecretManager
 
 logger = getLogger(__name__)
-
-
-def test_project() -> None:
-    assert GCPAuth().project() == 'stormware'
-    assert GCPAuth().project_id() == 'stormware-logikal-io'
-    assert GCPAuth(project='example').project() == 'example'
-    assert GCPAuth(project='example').project('test') == 'test'
-    assert GCPAuth().project('example') == 'example'
-
-
-def test_project_error(mocker: MockerFixture) -> None:
-    mocker.patch('stormware.google.auth.project_name', return_value=None)
-    mocker.patch.dict(PYPROJECT, {'tool': {'stormware': {'project': None}}})
-    with raises(ValueError, match='You must provide a project'):
-        GCPAuth().project()
 
 
 def test_register(mocker: MockerFixture) -> None:
@@ -158,8 +142,8 @@ def test_oauth_credentials(  # pylint: disable=too-many-statements
     auth.clear_cache()
     del secrets[GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY]
     assert auth.credentials() == user_credentials
-    cache_file_name = f'stormware/stormware/google/{GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY}.json'
-    assert (tmp_path / cache_file_name).read_text() == user_credentials.to_json()
+    local_file_path = f'stormware/stormware/google/{GCPAuth.DEFAULT_OAUTH_CREDENTIALS_KEY}.json'
+    assert (tmp_path / local_file_path).read_text() == user_credentials.to_json()
 
     logger.info('Testing interactive flow (any user, not cached, stored in local storage)')
     auth.clear_cache()

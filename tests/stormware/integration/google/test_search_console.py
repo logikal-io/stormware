@@ -24,8 +24,8 @@ def test_sites() -> None:
 def test_report() -> None:
     with SearchConsole(site_url=SITE_URL) as search_console:
         report = search_console.report(
-            start_date=date(2026, 7, 1),
-            end_date=date(2026, 7, 13),
+            start_date=date(2026, 7, 11),
+            end_date=date(2026, 7, 12),
             request={'dimensions': ['query', 'page']},
         )
     expected = pandas.DataFrame({

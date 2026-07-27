@@ -2,7 +2,7 @@ from logikal_utils.project import PYPROJECT
 from pytest import raises
 from pytest_mock import MockerFixture
 
-from stormware.auth import Auth
+from stormware.auth import Auth, ProjectAuth
 
 
 def test_organization() -> None:
@@ -17,3 +17,18 @@ def test_organization_error(mocker: MockerFixture) -> None:
     mocker.patch.dict(PYPROJECT, {'tool': {'stormware': {'organization': None}}})
     with raises(ValueError, match='You must provide an organization'):
         Auth().organization()
+
+
+def test_project() -> None:
+    assert ProjectAuth().project() == 'stormware'
+    assert ProjectAuth().project_id() == 'stormware-logikal-io'
+    assert ProjectAuth(project='example').project() == 'example'
+    assert ProjectAuth(project='example').project('test') == 'test'
+    assert ProjectAuth().project('example') == 'example'
+
+
+def test_project_error(mocker: MockerFixture) -> None:
+    mocker.patch('stormware.auth.project_name', return_value=None)
+    mocker.patch.dict(PYPROJECT, {'tool': {'stormware': {'project': None}}})
+    with raises(ValueError, match='You must provide a project'):
+        ProjectAuth().project()

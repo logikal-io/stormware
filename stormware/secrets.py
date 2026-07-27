@@ -5,11 +5,29 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
-class SecretStore(ABC):  # pylint: disable=too-few-public-methods
+class SecretStore(ABC):
     @abstractmethod
     def __getitem__(self, key: str) -> str:
         """
         Retrieve the secret under the given key.
+        """
+
+    @abstractmethod
+    def __setitem__(self, key: str, value: str) -> None:
+        """
+        Set the secret to the given value.
+        """
+
+    @abstractmethod
+    def __contains__(self, key: str) -> bool:
+        """
+        Check if the given secret exists.
+        """
+
+    @abstractmethod
+    def get(self, key: str, default: str | None = None) -> str | None:
+        """
+        Retrieve the secret under the given key if it exists and has an active version.
         """
 
 
