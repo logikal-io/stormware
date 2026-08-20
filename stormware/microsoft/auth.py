@@ -28,18 +28,19 @@ class OAuthServer(HTTPServer):
 
         class OAuthHandler(BaseHTTPRequestHandler):
             def do_GET(handler) -> None:  # pylint: disable=invalid-name, no-self-argument
+                status = 'successful' if 'code' in handler.path else 'unsuccessful'
                 handler.send_response(200)
                 handler.send_header('Content-type', 'text/html')
                 handler.end_headers()
-                handler.wfile.write(b"""
+                handler.wfile.write(f"""
                   <html>
-                    <head><title>Authentication Successful</title></head>
+                    <head><title>Authentication {status}</title></head>
                     <body>
-                      <h1>Authentication Successful</h1>
+                      <h1>Authentication {status}</h1>
                       <p>You may close this window.</p>
                     </body>
                   </html>
-                """)
+                """.encode(encoding='utf-8'))
                 self.response_uri = f'http://localhost:{self.server_port}{handler.path}'
 
         super().__init__(('localhost', port), RequestHandlerClass=OAuthHandler)
@@ -103,10 +104,10 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
         ``tenant`` keys. The client ID, client secret and tenant can be obtained by creating a
         Microsoft Azure web app (under
         https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationsListBlade with a
-        redirect URI of "http://localhost:42942"). The client ID is the value found in the
+        redirect URI of ``http://localhost:42942``). The client ID is the value found in the
         "Overview" section under "Application (client) ID", and the tenant is the value found under
-        "Directory (tenant) ID". The client secret can be generated in the "Certificates & secrets"
-        section.
+        "Directory (tenant) ID". The client secret can be generated in the "Manage" section under
+        the "Certificates & secrets" subsection.
 
         The developer token is loaded from the secret store using the provided key. It can be
         obtained under "Settings > Developer settings" in Microsoft Advertising (at

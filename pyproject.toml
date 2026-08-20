@@ -63,6 +63,8 @@ markers = ['integration']
 norecursedirs = ['build', 'docs/jupyter_execute']
 filterwarnings = [
   'error',
+  # See https://github.com/googleapis/google-cloud-python/issues/18181
+  'ignore:Retrieving Arrow record batches directly.*is deprecated.*:PendingDeprecationWarning',
   # Note: not sure where are these coming from, can't reproduce locally
   'ignore:unclosed.*[Ss]ocket.*:ResourceWarning',
   # These are produced by Bing Ads Python SDK, not sure exacly why
