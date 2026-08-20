@@ -32,7 +32,7 @@ class OAuthServer(HTTPServer):
                 handler.send_response(200)
                 handler.send_header('Content-type', 'text/html')
                 handler.end_headers()
-                handler.wfile.write(bf"""
+                handler.wfile.write(f"""
                   <html>
                     <head><title>Authentication {status}</title></head>
                     <body>
@@ -40,7 +40,7 @@ class OAuthServer(HTTPServer):
                       <p>You may close this window.</p>
                     </body>
                   </html>
-                """)
+                """.encode(encoding='utf-8'))
                 self.response_uri = f'http://localhost:{self.server_port}{handler.path}'
 
         super().__init__(('localhost', port), RequestHandlerClass=OAuthHandler)

@@ -19,7 +19,7 @@ def test_oauth_server() -> None:
     def send_request() -> None:
         with urlopen(callback_url) as response:  # nosec: safe call
             assert response.status == 200
-            assert b'Authentication Successful' in response.read()
+            assert b'Authentication successful' in response.read()
 
     with OAuthServer(port=port) as server:
         thread = Thread(target=send_request)
