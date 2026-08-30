@@ -1,3 +1,4 @@
+# pylint: disable=cyclic-import; false positive
 from pytest import raises
 from pytest_mock import MockerFixture
 
