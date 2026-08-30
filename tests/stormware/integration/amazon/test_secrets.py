@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import sleep
 
 from pytest import mark
 
@@ -24,6 +25,7 @@ def test_get_set() -> None:
 
     # Set a new value
     secrets[SECRET_KEY] = secret_value
+    sleep(1)  # it seems that secret manager is eventually consistent
     assert secrets[SECRET_KEY] == secret_value
     assert secrets.get(SECRET_KEY) == secret_value
 

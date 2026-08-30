@@ -64,8 +64,11 @@ norecursedirs = ['build', 'docs/jupyter_execute']
 filterwarnings = [
   'error',
   # See https://github.com/googleapis/google-cloud-python/issues/18181
-  'ignore:Retrieving Arrow record batches directly.*is deprecated.*:PendingDeprecationWarning',
-  'ignore:Loading DataFrames via google-cloud-bigquery is deprecated.*:PendingDeprecationWarning',
+  'ignore:Loading DataFrames .* is deprecated.*:PendingDeprecationWarning',
+  'ignore:Inserting rows from DataFrames .* is deprecated.*:PendingDeprecationWarning',
+  'ignore:Retrieving DataFrames .* is deprecated.*:PendingDeprecationWarning',
+  'ignore:Retrieving PyArrow Tables .* is deprecated.*:PendingDeprecationWarning',
+  'ignore:Retrieving Arrow record batches directly .* is deprecated.*:PendingDeprecationWarning',
   # Note: not sure where are these coming from, can't reproduce locally
   'ignore:unclosed.*[Ss]ocket.*:ResourceWarning',
   # These are produced by Bing Ads Python SDK, not sure exacly why
@@ -80,3 +83,6 @@ omit = [
   'stormware/google/ads.py',  # not tested yet
   'tests/stormware/integration/google/test_ads.py',  # not tested yet
 ]
+
+[tool.pylint.'messages control']
+disable = ['cyclic-import']  # see https://github.com/pylint-dev/pylint/issues/9175
