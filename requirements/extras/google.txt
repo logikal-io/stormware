@@ -1,8 +1,8 @@
 google-ads~=31.4
-google-api-python-client~=2.199
+google-api-python-client~=2.200
 google-auth~=2.57
 google-auth-oauthlib~=1.4
-google-cloud-bigquery[pandas]~=3.44
+google-cloud-bigquery[pandas]~=3.45
 google-cloud-bigquery-storage~=2.41
 google-cloud-secret-manager~=2.30
 google-crc32c~=1.8
