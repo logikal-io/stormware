@@ -206,15 +206,17 @@ class Gmail(Connector, ClientManager[Any]):
         Load a specific message.
         """
         logger.info(f'Loading message "{message.id}" of user "{user_id}"')
+        part_fields = ', '.join([
+            'partId', 'mimeType', 'filename', 'body(data, attachmentId)',
+            'parts(partId, mimeType, filename, body(data))',
+        ])
+        payload_fields = ', '.join([
+            'partId', 'headers', 'mimeType', 'filename', 'body(data)',
+            f'parts({part_fields})',
+        ])
         fields = ', '.join([
             'id', 'threadId', 'labelIds', 'internalDate',
-            f'payload({', '.join([
-                'partId', 'headers', 'mimeType', 'filename', 'body(data)',
-                f'parts({', '.join([
-                    'partId', 'mimeType', 'filename', 'body(data, attachmentId)',
-                    'parts(partId, mimeType, filename, body(data))',
-                ])})',
-            ])})',
+            f'payload({payload_fields})',
         ])
         response = self.client.users().messages().get(  # pylint: disable=no-member
             userId=user_id,
