@@ -52,7 +52,7 @@ class SecretsManager(SecretStore):
 
         logger.debug('Adding new secret version')
         response = self._client.put_secret_value(SecretId=key, SecretString=value)
-        logger.debug(f'New version successfully added with ID "{response['VersionId']}"')
+        logger.debug(f'New version successfully added with ID "{response["VersionId"]}"')
 
     def __contains__(self, key: str) -> bool:
         """
