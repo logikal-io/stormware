@@ -1,8 +1,10 @@
+# Note: requirements should not be forced above the latest constraints from Cloud Composer
+# (see https://cloud.google.com/composer/docs/composer-versions)
 google-ads~=31.3
-google-api-python-client~=2.200
-google-auth~=2.57
+google-api-python-client~=2.198
+google-auth~=2.56
 google-auth-oauthlib~=1.4
-google-cloud-bigquery[pandas]~=3.45
-google-cloud-bigquery-storage~=2.41
+google-cloud-bigquery[pandas]~=3.43
+google-cloud-bigquery-storage~=2.40
 google-cloud-secret-manager~=2.30
 google-crc32c~=1.8
