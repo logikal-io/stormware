@@ -11,7 +11,6 @@ from google.protobuf.json_format import MessageToDict
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
 from stormware.google.connector import Connector
-from stormware.secrets import SecretStore
 
 logger = getLogger(__name__)
 
@@ -19,13 +18,11 @@ logger = getLogger(__name__)
 class GoogleAds(Connector, ClientManager[GoogleAdsClient]):
     SCOPES = ['https://www.googleapis.com/auth/adwords']
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         *,
         customer_id: str | None = None,
         login_customer_id: str | None = None,
-        secret_key: str = 'stormware-google-ads',  # nosec: only path to the secret
-        secret_store: SecretStore | None = None,
         organization: str | None = None,
         project: str | None = None,
         auth: GCPAuth | None = None,
@@ -41,11 +38,6 @@ class GoogleAds(Connector, ClientManager[GoogleAdsClient]):
             organization: The organization to use for authentication.
             project: The project to use for authentication.
             auth: The Google Cloud Platform authentication manager to use.
-
-        **Authentication**
-
-        You need at least basic access level to use this connector. For more information see
-        https://developers.google.com/google-ads/api/docs/api-policy/access-levels.
 
         """
         super().__init__()
