@@ -35,5 +35,5 @@ def gmail() -> Iterator[Gmail]:
 @fixture
 def google_ads() -> Iterator[GoogleAds]:
     auth = GCPAuth(oauth_user_email=TEST_USER_EMAIL)
-    with GoogleAds(auth=auth, customer_id=TEST_GOOGLE_ADS_CUSTOMER_ID) as google_ads:
-        yield google_ads
+    with GoogleAds(auth=auth, customer_id=TEST_GOOGLE_ADS_CUSTOMER_ID) as google_ads_obj:
+        yield google_ads_obj
