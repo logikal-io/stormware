@@ -78,11 +78,5 @@ filterwarnings = [
   'ignore:datetime.datetime.utcnow\(\) is deprecated.*:DeprecationWarning',
 ]
 
-[tool.coverage.report]
-omit = [
-  'stormware/google/ads.py',  # not tested yet
-  'tests/stormware/integration/google/test_ads.py',  # not tested yet
-]
-
 [tool.pylint.'messages control']
 disable = ['cyclic-import']  # see https://github.com/pylint-dev/pylint/issues/9175
