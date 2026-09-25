@@ -2,7 +2,6 @@
 Google Ads API connector.
 """
 # Documentation: https://developers.google.com/google-ads/api
-import json
 from logging import getLogger
 
 import pandas as pd
@@ -12,7 +11,6 @@ from google.protobuf.json_format import MessageToDict
 from stormware.client_manager import ClientManager
 from stormware.google.auth import GCPAuth
 from stormware.google.connector import Connector
-from stormware.secrets import SecretStore, default_secret_store
 
 logger = getLogger(__name__)
 
@@ -20,12 +18,11 @@ logger = getLogger(__name__)
 class GoogleAds(Connector, ClientManager[GoogleAdsClient]):
     SCOPES = ['https://www.googleapis.com/auth/adwords']
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         *,
         customer_id: str | None = None,
-        secret_key: str = 'stormware-google-ads',  # nosec: only path to the secret
-        secret_store: SecretStore | None = None,
+        login_customer_id: str | None = None,
         organization: str | None = None,
         project: str | None = None,
         auth: GCPAuth | None = None,
@@ -37,35 +34,23 @@ class GoogleAds(Connector, ClientManager[GoogleAdsClient]):
 
         Args:
             customer_id: The Google Ads customer ID to use.
-            secret_key: The key of the credentials in the secret store.
-            secret_store: The secret store to use for retrieving the credentials.
-                Uses the default secret store when not provided.
+            login_customer_id: The Google Ads manager account ID to use for authentication.
             organization: The organization to use for authentication.
             project: The project to use for authentication.
             auth: The Google Cloud Platform authentication manager to use.
 
-        **Authentication**
-
-        The developer token is loaded from the secret store using the provided key. The secret must
-        be a string-encoded JSON object with the ``developer_token`` key. Additionally, when
-        accessing an account through a manager account, the ``login_customer_id`` key must also be
-        set to the 10-digit customer ID of the manager account.
-
         """
         super().__init__()
         self.customer_id = customer_id
+        self.login_customer_id = login_customer_id
         self.auth = auth or GCPAuth(organization=organization, project=project)
-        with default_secret_store(secret_store) as secrets:
-            self.credentials = json.loads(secrets[secret_key])
 
     def create_client(self) -> GoogleAdsClient:
-        if login_customer_id := self.credentials.get('login_customer_id'):
-            login_customer_id = login_customer_id.replace('-', '')
-            logger.debug(f'Using login_customer_id "{login_customer_id}"')
         return GoogleAdsClient(
             credentials=self.auth.credentials(scopes=self.SCOPES),
-            developer_token=self.credentials['developer_token'],
-            login_customer_id=login_customer_id,
+            developer_token='',  # nosec: empty string; temporary, can be removed in google-ads>=32
+            login_customer_id=self.login_customer_id,
+            use_cloud_org_for_api_access=True,  # temporary, can be removed in google-ads>=32
         ).get_service('GoogleAdsService')
 
     def report(self, query: str, customer_id: str | None = None) -> pd.DataFrame:
@@ -74,7 +59,7 @@ class GoogleAds(Connector, ClientManager[GoogleAdsClient]):
 
         Args:
             query: The Google Ads Query Language query to execute.
-            customer_id: The customer ID to use.
+            customer_id: The Google Ads customer ID to use.
 
         **Documentation**
 
