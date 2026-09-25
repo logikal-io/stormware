@@ -1,6 +1,6 @@
 # Note: requirements should not be forced above the latest constraints from Cloud Composer
 # (see https://cloud.google.com/composer/docs/composer-versions)
-google-ads>=31.3  # temporary loosened from `~=` due to developer token removal
+google-ads~=31.3
 google-api-python-client~=2.198
 google-auth~=2.56
 google-auth-oauthlib~=1.4

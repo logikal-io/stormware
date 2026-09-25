@@ -48,7 +48,9 @@ class GoogleAds(Connector, ClientManager[GoogleAdsClient]):
     def create_client(self) -> GoogleAdsClient:
         return GoogleAdsClient(
             credentials=self.auth.credentials(scopes=self.SCOPES),
+            developer_token='',  # temporary, can be removed in google-ads>=32
             login_customer_id=self.login_customer_id,
+            use_cloud_org_for_api_access=True,  # temporary, can be removed in google-ads>=32
         ).get_service('GoogleAdsService')
 
     def report(self, query: str, customer_id: str | None = None) -> pd.DataFrame:
