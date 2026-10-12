@@ -1,0 +1,4 @@
+# Note: requirements should not be forced above the latest constraints from Cloud Composer
+# (see https://cloud.google.com/composer/docs/composer-versions)
+stormware[google]
+google-ads~=31.3
