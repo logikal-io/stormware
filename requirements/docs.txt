@@ -1,6 +1,8 @@
 -e .
 -r core.txt
 -r extras/google.txt
+-r extras/google_ads.txt
+-r extras/google_bigquery.txt
 -r extras/amazon.txt
 -r extras/facebook.txt
 -r extras/microsoft.txt

@@ -1,0 +1,5 @@
+# Note: requirements should not be forced above the latest constraints from Cloud Composer
+# (see https://cloud.google.com/composer/docs/composer-versions)
+stormware[google]
+google-cloud-bigquery[pandas]~=3.43
+google-cloud-bigquery-storage~=2.40

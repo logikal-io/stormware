@@ -32,6 +32,8 @@ dependencies = {file = 'requirements/core.txt'}
 
 [tool.setuptools.dynamic.optional-dependencies]
 google = {file = 'requirements/extras/google.txt'}
+google-ads = {file = 'requirements/extras/google_ads.txt'}
+google-bigquery = {file = 'requirements/extras/google_bigquery.txt'}
 amazon = {file = 'requirements/extras/amazon.txt'}
 facebook = {file = 'requirements/extras/facebook.txt'}
 microsoft = {file = 'requirements/extras/microsoft.txt'}

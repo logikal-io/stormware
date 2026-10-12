@@ -47,14 +47,6 @@ You can install the Google connectors through the ``google`` extra:
 
 .. autoclass:: stormware.google.connector.Connector
 
-Google Ads
-~~~~~~~~~~
-.. autoclass:: stormware.google.ads.GoogleAds
-
-Google BigQuery
-~~~~~~~~~~~~~~~
-.. autoclass:: stormware.google.bigquery.BigQuery
-
 Google Drive
 ~~~~~~~~~~~~~
 .. autoclass:: stormware.google.drive.DrivePath
@@ -79,6 +71,26 @@ Google Search Console
 Gmail
 ~~~~~
 .. automodule:: stormware.google.gmail
+
+Google Ads
+~~~~~~~~~~
+You can install the Google Ads connector through the ``google-ads`` extra:
+
+.. code-block:: shell
+
+    pip install stormware[google-ads]
+
+.. autoclass:: stormware.google.ads.GoogleAds
+
+Google BigQuery
+~~~~~~~~~~~~~~~
+You can install the Google BigQuery connector through the ``google-bigquery`` extra:
+
+.. code-block:: shell
+
+    pip install stormware[google-bigquery]
+
+.. autoclass:: stormware.google.bigquery.BigQuery
 
 Microsoft
 ---------
