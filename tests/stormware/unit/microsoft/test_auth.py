@@ -51,11 +51,23 @@ def test_store_local_credentials(tmp_path: Path) -> None:
 
 
 def test_stored_credentials(auth_grant: Mock, secrets: dict[str, str]) -> None:
-    secrets[MicrosoftAuth.DEFAULT_OAUTH_CREDENTIALS_KEY] = '{"refresh_token": "stored_token"}'
+    key = MicrosoftAuth.DEFAULT_OAUTH_CREDENTIALS_KEY
+    secrets[key] = '{"refresh_token": "stored_token"}'
 
     MicrosoftAuth().authorization_data()
     auth_grant.request_oauth_tokens_by_refresh_token.assert_called_once_with('stored_token')
     auth_grant.request_oauth_tokens_by_response_uri.assert_not_called()
+
+    # Error during token refresh generates a new token
+    exception = OAuthTokenRequestException(
+        error_code='invalid_client',
+        error_description='Client authentication failed',
+    )
+    auth_grant.request_oauth_tokens_by_refresh_token.side_effect = exception
+
+    with raises(OAuthTokenRequestException):
+        MicrosoftAuth().authorization_data()
+    assert json.loads(secrets[key]) == {'refresh_token': 'new_refresh_token'}  # nosec: test token
 
 
 @mark.usefixtures('secrets')
