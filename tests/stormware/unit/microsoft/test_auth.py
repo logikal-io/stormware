@@ -4,6 +4,7 @@ from pathlib import Path
 from threading import Thread
 from urllib.request import urlopen
 
+from bingads.authorization import OAuthTokenRequestException
 from pytest import raises
 from pytest_mock import MockerFixture
 
@@ -33,9 +34,17 @@ def test_authorization_data(mocker: MockerFixture, tmp_path: Path) -> None:
     mocker.patch('stormware.microsoft.auth.webbrowser.open')
 
     refresh_token = 'new_refresh_token'  # nosec: only used for testing
-    auth_grant = mocker.patch('stormware.microsoft.auth.OAuthWebAuthCodeGrant').return_value
+    grant_class = mocker.patch('stormware.microsoft.auth.OAuthWebAuthCodeGrant')
+    auth_grant = grant_class.return_value
     auth_grant.get_authorization_endpoint.return_value = 'https://login.microsoft.com/auth'
     auth_grant.oauth_tokens.refresh_token = refresh_token
+
+    def return_tokens(_value: str) -> None:
+        callback = grant_class.call_args.kwargs['token_refreshed_callback']
+        callback(auth_grant.oauth_tokens)
+
+    auth_grant.request_oauth_tokens_by_refresh_token.side_effect = return_tokens
+    auth_grant.request_oauth_tokens_by_response_uri.side_effect = return_tokens
 
     server = mocker.patch('stormware.microsoft.auth.OAuthServer')
     server = server.return_value.__enter__.return_value
@@ -97,3 +106,24 @@ def test_authorization_data(mocker: MockerFixture, tmp_path: Path) -> None:
     auth = MicrosoftAuth()
     auth.authorization_data()
     auth_grant.request_oauth_tokens_by_refresh_token.assert_called_with(refresh_token)
+
+    logger.info('Testing expired stored credentials')
+    secrets[MicrosoftAuth.DEFAULT_OAUTH_CREDENTIALS_KEY] = '{"refresh_token": "expired_token"}'
+    auth_grant.request_oauth_tokens_by_refresh_token.side_effect = OAuthTokenRequestException(
+        error_code='invalid_grant',
+        error_description='Refresh token expired',
+    )
+    is_tty.return_value = False
+    auth = MicrosoftAuth()
+    with raises(RuntimeError, match='not an interactive session'):
+        auth.authorization_data()
+    assert json.loads(secrets[MicrosoftAuth.DEFAULT_OAUTH_CREDENTIALS_KEY]) == {
+        'refresh_token': 'expired_token',
+    }
+
+    logger.info('Testing expired stored credentials (interactive flow)')
+    is_tty.return_value = True
+    auth.authorization_data()
+    assert json.loads(secrets[MicrosoftAuth.DEFAULT_OAUTH_CREDENTIALS_KEY]) == {
+        'refresh_token': refresh_token,
+    }
