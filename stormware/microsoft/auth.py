@@ -12,7 +12,9 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any
 
-from bingads.authorization import AuthorizationData, OAuthWebAuthCodeGrant
+from bingads.authorization import (
+    AuthorizationData, OAuthTokenRequestException, OAuthTokens, OAuthWebAuthCodeGrant,
+)
 from logikal_utils.project import tool_config
 from xdg_base_dirs import xdg_config_home
 
@@ -143,6 +145,7 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
             redirection_uri=self.REDIRECT_URI,
             env=self.environment,
             tenant=self.client_secrets.get('tenant'),
+            token_refreshed_callback=self._store_oauth_credentials,
         )
         self._authorization_data = AuthorizationData(
             developer_token=self.developer_token,
@@ -179,7 +182,12 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
                     secrets=secrets,
                     local_credentials_path=local_credentials_path,
                 ):
-                    return stored
+                    try:
+                        self._auth.request_oauth_tokens_by_refresh_token(stored['refresh_token'])
+                        return {'refresh_token': self._auth.oauth_tokens.refresh_token}
+                    except OAuthTokenRequestException as error:
+                        if error.error_code != 'invalid_grant':
+                            raise
 
             # Execute OAuth flow
             if not sys.stdin.isatty():
@@ -199,10 +207,14 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
 
             logger.debug('Requesting refresh token')
             self._auth.request_oauth_tokens_by_response_uri(response_uri)
-            credentials = {'refresh_token': self._auth.oauth_tokens.refresh_token}
-            credentials_string = json.dumps(credentials)
+            return {'refresh_token': self._auth.oauth_tokens.refresh_token}
 
-            # Store credentials
+    def _store_oauth_credentials(self, tokens: OAuthTokens) -> None:
+        credentials = {'refresh_token': tokens.refresh_token}
+        credentials_string = json.dumps(credentials)
+        local_credentials_path = self._local_config / f'{self._oauth_credentials_key}.json'
+
+        with default_secret_store(self._secret_store) as secrets:
             if self._oauth_credentials_key in secrets:
                 logger.debug('Storing credentials in Secret Manager')
                 secrets[self._oauth_credentials_key] = credentials_string
@@ -213,7 +225,7 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
                 local_credentials_path.parent.mkdir(parents=True, exist_ok=True)
                 local_credentials_path.write_text(credentials_string)
 
-            return credentials
+        self._oauth_credentials = credentials
 
     def authorization_data(self) -> AuthorizationData:
         """
@@ -223,6 +235,4 @@ class MicrosoftAuth(ProjectAuth):  # pylint: disable=too-many-instance-attribute
             logger.debug('Using cached credentials')
         else:
             self._oauth_credentials = self._get_oauth_credentials()
-            refresh_token = self._oauth_credentials['refresh_token']
-            self._auth.request_oauth_tokens_by_refresh_token(refresh_token)
         return self._authorization_data

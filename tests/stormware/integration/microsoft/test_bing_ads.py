@@ -10,17 +10,17 @@ from stormware.microsoft.bing_ads import BingAds
 ACCOUNT_NAME = 'Logikal GmbH'
 
 
-def test_report_errors() -> None:
+def test_report() -> None:
+    # Report errors
     bing_ads = BingAds()
     with raises(ValueError, match='specify the account'):
         bing_ads.account_id()
     with raises(RuntimeError, match='not found in your accounts'):
         bing_ads.account_id(account_name='non-existent')
 
-
-def test_report() -> None:
-    columns = ['CampaignName', 'TimePeriod', 'Spend', 'Impressions', 'Clicks']
+    # Report
     bing_ads = BingAds(account_name=ACCOUNT_NAME)
+    columns = ['CampaignName', 'TimePeriod', 'Spend', 'Impressions', 'Clicks']
     report = bing_ads.report(CampaignPerformanceReportRequest(
         aggregation='Daily',
         columns=columns,
@@ -40,9 +40,7 @@ def test_report() -> None:
     }).convert_dtypes()
     assert_frame_equal(report, expected)
 
-
-def test_empty_report() -> None:
-    bing_ads = BingAds(account_name=ACCOUNT_NAME)
+    # Empty report
     report = bing_ads.report(CampaignPerformanceReportRequest(
         columns=['CampaignName', 'Spend'],
         scope=AccountThroughCampaignReportScope(account_ids=[bing_ads.account_id()]),
