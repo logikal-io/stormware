@@ -11,15 +11,15 @@ ACCOUNT_NAME = 'Logikal GmbH'
 
 
 def test_report() -> None:
-    bing_ads = BingAds(account_name=ACCOUNT_NAME)
-
     # Report errors
+    bing_ads = BingAds()
     with raises(ValueError, match='specify the account'):
         bing_ads.account_id()
     with raises(RuntimeError, match='not found in your accounts'):
         bing_ads.account_id(account_name='non-existent')
 
     # Report
+    bing_ads = BingAds(account_name=ACCOUNT_NAME)
     columns = ['CampaignName', 'TimePeriod', 'Spend', 'Impressions', 'Clicks']
     report = bing_ads.report(CampaignPerformanceReportRequest(
         aggregation='Daily',
