@@ -63,10 +63,12 @@ class GoogleAds(Connector, ClientManager[GoogleAdsClient]):
 
         **Documentation**
 
+        * Query reference: https://developers.google.com/google-ads/api/docs/query/overview
+        * Metrics reference: https://developers.google.com/google-ads/api/fields
+
         =========== ==========================================================================
         Entity      Link
         =========== ==========================================================================
-        Overview    https://developers.google.com/google-ads/api/docs/query/overview
         Campaigns   https://developers.google.com/google-ads/api/reference/rpc/latest/Campaign
         Ad groups   https://developers.google.com/google-ads/api/reference/rpc/latest/AdGroup
         Ads         https://developers.google.com/google-ads/api/reference/rpc/latest/Ad
