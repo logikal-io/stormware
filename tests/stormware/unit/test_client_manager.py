@@ -2,7 +2,7 @@
 from contextlib import AbstractContextManager
 from typing import Any
 
-from pytest import raises
+from pytest import mark, raises
 
 from stormware.client_manager import ClientManager
 
@@ -54,11 +54,8 @@ class ValidClientManager(ClientManager[Client]):
         return self.client_class()
 
 
-def test_valid_client_manager() -> None:
-    with ValidClientManager(client_class=CloseableClient) as client_manager:
-        assert not client_manager.client.closed
-    assert client_manager.client.closed
-
-    with ValidClientManager(client_class=ExiteableClient) as client_manager:
+@mark.parametrize('client_class', [CloseableClient, ExiteableClient])
+def test_valid_client_manager(client_class: type[Client]) -> None:
+    with ValidClientManager(client_class=client_class) as client_manager:
         assert not client_manager.client.closed
     assert client_manager.client.closed
