@@ -24,6 +24,7 @@ from xdg_base_dirs import xdg_config_home
 
 from stormware.auth import ProjectAuth
 from stormware.google.connector import Connector
+from stormware.secrets import SecretStore
 
 logger = getLogger(__name__)
 
@@ -222,7 +223,7 @@ class GCPAuth(ProjectAuth):  # pylint: disable=too-many-instance-attributes
 
     def _get_stored_oauth_credentials(
         self,
-        secrets: dict[str, str],
+        secrets: SecretStore,
         local_credentials_path: Path,
         config: Config,
     ) -> OAuth2Credentials | None:

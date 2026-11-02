@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from contextlib import AbstractContextManager
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Any, Generic, Protocol, Self, TypeVar
 
 
 class Closeable(Protocol):  # pylint: disable=too-few-public-methods
@@ -11,7 +11,7 @@ class Closeable(Protocol):  # pylint: disable=too-few-public-methods
 Client = TypeVar('Client', bound=Closeable | AbstractContextManager[Any])
 
 
-class ClientManager(AbstractContextManager[Client], Generic[Client]):
+class ClientManager(AbstractContextManager['ClientManager[Client]'], Generic[Client]):
     def __init__(self, *_args: Any, **_kwargs: Any):
         self._client: Client | None = None
 
@@ -25,7 +25,7 @@ class ClientManager(AbstractContextManager[Client], Generic[Client]):
     def create_client(self) -> Client:
         ...
 
-    def __enter__(self) -> Any:
+    def __enter__(self) -> Self:
         self._client = self.create_client()
         return self
 
